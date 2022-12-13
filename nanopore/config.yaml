@@ -1,2 +1,9 @@
+# directory containing runs
 data_dir: 'test'
+
+# what to call directory for transfer
 transfer_dir: '_transfer'
+
+# minimum number of seconds a run needs
+# to be finished before archiving
+time_delay: 10

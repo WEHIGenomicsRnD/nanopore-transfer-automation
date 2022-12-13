@@ -38,7 +38,7 @@ for run in runs:
         for subdir in subdirs:
             os.makedirs(os.path.join(basedir, subdir))
         if runs[run]:
-            final_summary = os.path.join(basedir, 
+            final_summary = os.path.join(basedir,
                                          f'sequencing_summary_{flowcellid}_{runhex}_{get_random_hexstring(1e8)}.txt')
             open(final_summary, 'a').close()
         random_fastq_pass = os.path.join(basedir, 'fastq_pass', f'{get_random_hexstring(1e8)}.fastq')
@@ -51,7 +51,7 @@ for run in runs:
         open(random_fast5_pass, 'a').close()
         open(random_fast5_fail, 'a').close()
         open(random_report, 'a').close()
-        
+
 # make a few test dirs that are meant to be ignored
 os.makedirs('test/TEST_a')
 os.makedirs('test/TEST_b')
@@ -68,25 +68,38 @@ def test_make_archive():
 
 def test_archive_runs_if_complete():
     # complete run test
-    aa.archive_runs_if_complete('test', '20221208_wehi_bowden_runa', '_transfer')
-    
+    aa.archive_runs_if_complete('test', '20221208_wehi_bowden_runa', '_transfer', 0)
+
     rundir = 'test/20221208_wehi_bowden_runa'
     fast5_tar = glob.glob(f'{rundir}/_transfer/fast5/sample_a/*_fast5.tar.gz')
     fastq_tar = glob.glob(f'{rundir}/_transfer/fastq/sample_a/*_fastq.tar')
     report_tar = glob.glob(f'{rundir}/_transfer/reports/sample_a/*_reports.tar.gz')
-    
+
     assert len(fast5_tar) == 1
     assert len(fastq_tar) == 1
     assert len(report_tar) == 1
-    
+
+    # complete run not within time delay
+    aa.archive_runs_if_complete('test', '20221208_wehi_bowden_runb', '_transfer', 600)
+
+    rundir = 'test/20221208_wehi_bowden_runb'
+    fast5_tar = glob.glob(f'{rundir}/_transfer/fast5/sample_a/*_fast5.tar.gz')
+    fastq_tar = glob.glob(f'{rundir}/_transfer/fastq/sample_a/*_fastq.tar')
+    report_tar = glob.glob(f'{rundir}/_transfer/reports/sample_a/*_reports.tar.gz')
+
+    assert len(fast5_tar) == 0
+    assert len(fastq_tar) == 0
+    assert len(report_tar) == 0
+
+
     # incomplete run test
-    aa.archive_runs_if_complete('test', '20221208_wehi_bowden_runc', '_transfer')
-    
+    aa.archive_runs_if_complete('test', '20221208_wehi_bowden_runc', '_transfer', 0)
+
     rundir = 'test/20221208_wehi_bowden_runc'
     fast5_tar = glob.glob(f'{rundir}/_transfer/fast5/sample_a/*_fast5.tar.gz')
     fastq_tar = glob.glob(f'{rundir}/_transfer/fastq/sample_a/*_fastq.tar')
     report_tar = glob.glob(f'{rundir}/_transfer/reports/sample_a/*_reports.tar.gz')
-    
+
     assert len(fast5_tar) == 0
     assert len(fastq_tar) == 0
     assert len(report_tar) == 0

@@ -7,7 +7,7 @@ License     : TBD
 Maintainer  : Marek Cmero
 Portability : POSIX
 Scans data directory for runs matching metadata schema,
-YYYYMMDD_affiliation_labname_runname, then check whether
+YYYYMMDD_affiliation_labname_projname, then check whether
 that run has finished and then  autonmatically archives
 run into reports, fastq and fast5 archives, placing them
 in a transfer directory for egress.
@@ -18,6 +18,7 @@ import re
 import subprocess
 import glob
 import logging
+import time
 from argparse import ArgumentParser
 from datetime import datetime
 import yaml
@@ -131,7 +132,7 @@ def get_project_dirs(data_dir):
             project_dirs.append(proj_dir)
     return project_dirs
 
-def archive_runs_if_complete(data_dir, proj_dir, transfer_dir):
+def archive_runs_if_complete(data_dir, proj_dir, transfer_dir, time_delay):
     '''
     Checks whether run is complete, if so,
     create one archive each for reports,
@@ -154,11 +155,17 @@ def archive_runs_if_complete(data_dir, proj_dir, transfer_dir):
                 continue
             run_contents = os.listdir(run_dir_full)
 
-            run_finished = [bool(re.match(end_of_run_file_regex, rc)) for rc in run_contents]
-            if any(run_finished):
-                logging.info('Run %s finished! Making archives...', run_dir)
-                for file_type in file_types:
-                    make_archive(data_dir, proj_dir, sample_dir, run_dir, transfer_dir, file_type)
+            eor_files = list(filter(end_of_run_file_regex.match, run_contents))
+            if len(eor_files) > 0:
+                logging.info('Run %s finished! Checking time delay...', run_dir)
+                run_file = os.path.join(run_dir_full, eor_files[0])
+                if time.time() - os.path.getctime(run_file) > time_delay:
+                    logging.info('Making archives...')
+                    for file_type in file_types:
+                        make_archive(data_dir, proj_dir, sample_dir, run_dir, transfer_dir, file_type)
+                else:
+                    logging.info('Run %s has not been complete for %f seconds yet, skipping.',
+                                 run_dir, time_delay)
 
 def main():
     '''
@@ -176,6 +183,7 @@ def main():
 
     data_dir = config['data_dir']
     transfer_dir = config['transfer_dir']
+    time_delay = config['time_delay']
 
     if not os.path.exists(data_dir):
         logging.error('Data directory does not exist, exiting.')
@@ -183,7 +191,7 @@ def main():
 
     project_dirs = get_project_dirs(data_dir)
     for proj_dir in project_dirs:
-        archive_runs_if_complete(data_dir, proj_dir, transfer_dir)
+        archive_runs_if_complete(data_dir, proj_dir, transfer_dir, time_delay)
 
     logging.info('Done!')
 
