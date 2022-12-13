@@ -90,4 +90,3 @@ def test_archive_runs_if_complete():
     assert len(fast5_tar) == 0
     assert len(fastq_tar) == 0
     assert len(report_tar) == 0
-    
