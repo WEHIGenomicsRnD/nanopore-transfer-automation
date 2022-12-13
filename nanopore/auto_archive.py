@@ -18,12 +18,31 @@ import re
 import subprocess
 import glob
 import logging
+import yaml
+from argparse import ArgumentParser
 from datetime import datetime
 
-DATADIR = '/test'
-TRANSFERDIRNAME= '_transfer'
 file_types = ['reports', 'fastq', 'fast5']
 proj_dir_regex = re.compile(r'^(\d{8})_([a-zA-Z0-9\-]+)_([a-zA-Z0-9\-]+)_([a-zA-Z0-9\-]+)$')
+
+def parse_args(args):
+    description = '''
+        Run auto-archiving with config file:
+
+        python auto_archive.py config.yaml
+
+        Config file should contain:
+
+        data_dir: <path_to_data_directory>
+        transfer_dir_name: <name_of_transfer_directories>
+        '''
+    parser = ArgumentParser(description=description)
+    parser.add_argument('config',
+                        metavar='CONFIG',
+                        type=str,
+                        help='Config file.')
+    return parser.parse_args(args)
+
 
 def init_logging(log_filename):
     logging.basicConfig(filename=log_filename,
@@ -33,7 +52,7 @@ def init_logging(log_filename):
                         datefmt="%Y-%m-%dT%H:%M:%S%z")
     logging.info('Auto-archiver started')
 
-def make_archive(proj_dir, sample_dir, run_dir, file_type):
+def make_archive(data_dir, proj_dir, sample_dir, run_dir, transfer_dir_name, file_type):
     '''
     Given directories for project, sample and run dirs,
     make tar.gz of report files and fast5 files, and
@@ -41,8 +60,8 @@ def make_archive(proj_dir, sample_dir, run_dir, file_type):
     '''
     assert file_type in file_types
     
-    run_dir_full = os.path.join(DATADIR, proj_dir, sample_dir, run_dir)
-    transfer_dir = os.path.join(DATADIR, proj_dir, TRANSFERDIRNAME)
+    run_dir_full = os.path.join(data_dir, proj_dir, sample_dir, run_dir)
+    transfer_dir = os.path.join(data_dir, proj_dir, transfer_dir_name)
     dest_dir = os.path.join(transfer_dir, file_type, sample_dir)
     os.makedirs(dest_dir, exist_ok=True)
 
@@ -55,6 +74,7 @@ def make_archive(proj_dir, sample_dir, run_dir, file_type):
     tar_args = '-cpvf' if file_type == 'fastq' else '-czpvf' # don't need to zip fastqs
     ext = 'tar' if file_type == 'fastq' else 'tar.gz'
     tar_file = os.path.join(dest_dir, f'{run_dir}_{file_type}.{ext}')
+    tar_file = os.path.abspath(tar_file) # need absolute path for tar to get put in right place
     files_to_archive = []
     
     if file_type == 'reports':        
@@ -68,7 +88,7 @@ def make_archive(proj_dir, sample_dir, run_dir, file_type):
         files_to_archive = ['fastq_pass', 'fastq_fail']
 
     for file in files_to_archive:
-        if not os.file.exists(file):
+        if not os.path.exists(os.path.join(run_dir_full, file)):
             logging.error(f'{file} does not exist!')
             return
         
@@ -86,64 +106,71 @@ def make_archive(proj_dir, sample_dir, run_dir, file_type):
     else:
         logging.error(f'An error occured archiving {file_type} for {run_dir}.')
 
-def get_project_dirs():
+def get_project_dirs(data_dir):
     '''
-    Iterate through directories in DATADIR,
+    Iterate through directories in data_dir,
     check whether each directory matches the
     naming schema, if so, add to a list and
     return.
     '''
     project_dirs = []
-    for proj_dir in os.listdir(DATADIR):
+    for proj_dir in os.listdir(data_dir):
         is_project_dir = re.match(proj_dir_regex, proj_dir)
         if is_project_dir:
             logging.info(f'Found project directory {proj_dir}.')
             project_dirs.append(proj_dir)
     return project_dirs
             
-def archive_runs_if_complete(proj_dir):
+def archive_runs_if_complete(data_dir, proj_dir, transfer_dir_name):
     '''    
     Checks whether run is complete, if so,
     create one archive each for reports,
     fast5 and fastq files.
     '''
     logging.info(f'Processing {proj_dir}...')
-    sample_dirs = os.listdir(os.path.join(DATADIR, proj_dir))
+    sample_dirs = os.listdir(os.path.join(data_dir, proj_dir))
 
     # iterate through sample dirs
     for sample_dir in sample_dirs:
-        full_sample_dir = os.path.join(DATADIR, proj_dir, sample_dir)
+        full_sample_dir = os.path.join(data_dir, proj_dir, sample_dir)
         if not os.path.isdir(full_sample_dir):
             continue
         run_dirs = os.listdir(full_sample_dir)
 
         # check whether each run is finished
-        for run_dir in run_dirs:                
-            run_dir_full = os.path.join(DATADIR, proj_dir, sample_dir, run_dir)
+        for run_dir in run_dirs:
+            run_dir_full = os.path.join(data_dir, proj_dir, sample_dir, run_dir)
             if not os.path.isdir(run_dir_full):
                 continue
             run_contents = os.listdir(run_dir_full)
 
-            run_finished = any([bool(re.match(r'^final_summary\w*\.txt', rc)) for rc in run_contents])
+            run_finished = any([bool(re.match(r'^sequencing_summary\w*\.txt', rc)) for rc in run_contents])
             if run_finished:
                 logging.info(f'Run {run_dir} finished! Making archives...')
                 for file_type in file_types:
-                    make_archive(proj_dir, sample_dir, run_dir, file_type)
+                    make_archive(data_dir, proj_dir, sample_dir, run_dir, transfer_dir_name, file_type)
             
 def main():
     init_logging('auto_archive_{:%Y-%m-%d_%H%M}.log'.format(datetime.now()))
     
-    if not os.path.exists(DATADIR):
-        logging.error('Data directory does not exist, exiting.')
+    args = parse_args(sys.argv[1:])
+    if not os.path.exists(args.config):
+        logging.error('Config file does not exist, exiting.')
         sys.exit()
     
-    if not DATADIR.startswith('/'):
-        logging.error('Data directory not an absolute path, exiting.')
+    stream = open(args.config, 'r')
+    config = yaml.load(stream, yaml.SafeLoader)
+
+    data_dir = config['data_dir']
+    transfer_dir_name = config['transfer_dir_name']
+
+    if not os.path.exists(data_dir):
+        logging.error('Data directory does not exist, exiting.')
         sys.exit()
 
-    project_dirs = get_project_dirs()
+    project_dirs = get_project_dirs(data_dir)
     for proj_dir in project_dirs:
-        archive_runs_if_complete(proj_dir)
+        archive_runs_if_complete(data_dir, proj_dir, transfer_dir_name)
 
     logging.info('Done!')
 

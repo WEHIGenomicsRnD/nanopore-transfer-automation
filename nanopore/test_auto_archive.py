@@ -39,7 +39,7 @@ for run in runs:
             os.makedirs(os.path.join(basedir, subdir))
         if runs[run]:
             final_summary = os.path.join(basedir, 
-                                         f'final_summary_{flowcellid}_{runhex}_{get_random_hexstring(1e8)}.txt')
+                                         f'sequencing_summary_{flowcellid}_{runhex}_{get_random_hexstring(1e8)}.txt')
             open(final_summary, 'a').close()
         random_fastq_pass = os.path.join(basedir, 'fastq_pass', f'{get_random_hexstring(1e8)}.fastq')
         random_fastq_fail = os.path.join(basedir, 'fastq_fail', f'{get_random_hexstring(1e8)}.fastq')
@@ -59,7 +59,7 @@ os.makedirs('test/TEST_b')
 ### end test data creation ###
 
 def test_make_archive():
-    project_dirs = aa.get_project_dirs()
+    project_dirs = aa.get_project_dirs('test')
     project_dirs_truth = ['20221208_wehi_bowden_runa',
                           '20221208_wehi_bowden_runb',
                           '20221208_wehi_bowden_runc']
@@ -68,7 +68,7 @@ def test_make_archive():
 
 def test_archive_runs_if_complete():
     # complete run test
-    aa.archive_runs_if_complete('20221208_wehi_bowden_runa')
+    aa.archive_runs_if_complete('test', '20221208_wehi_bowden_runa', '_transfer')
     
     rundir = 'test/20221208_wehi_bowden_runa'
     fast5_tar = glob.glob(f'{rundir}/_transfer/fast5/sample_a/*_fast5.tar.gz')
@@ -80,7 +80,7 @@ def test_archive_runs_if_complete():
     assert len(report_tar) == 1
     
     # incomplete run test
-    aa.archive_runs_if_complete('20221208_wehi_bowden_runc')
+    aa.archive_runs_if_complete('test', '20221208_wehi_bowden_runc', '_transfer')
     
     rundir = 'test/20221208_wehi_bowden_runc'
     fast5_tar = glob.glob(f'{rundir}/_transfer/fast5/sample_a/*_fast5.tar.gz')
