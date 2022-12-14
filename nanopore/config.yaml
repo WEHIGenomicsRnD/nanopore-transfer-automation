@@ -7,3 +7,8 @@ transfer_dir: '_transfer'
 # minimum number of seconds a run needs
 # to be finished before archiving
 time_delay: 10
+
+# directories exempt from the standard
+# mask; use YAML lists for this arg
+extra_dirs:
+    - 'TEST_b'

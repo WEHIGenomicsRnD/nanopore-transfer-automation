@@ -184,12 +184,18 @@ def main():
     data_dir = config['data_dir']
     transfer_dir = config['transfer_dir']
     time_delay = config['time_delay']
+    extra_dirs = config['extra_dirs']
 
     if not os.path.exists(data_dir):
         logging.error('Data directory does not exist, exiting.')
         sys.exit()
 
+    if not isinstance(extra_dirs, list) and extra_dirs:
+        logging.error('extra_dirs argument is not a list or empty, exiting.')
+        sys.exit()
+
     project_dirs = get_project_dirs(data_dir)
+    project_dirs = project_dirs + extra_dirs if extra_dirs else project_dirs
     for proj_dir in project_dirs:
         archive_runs_if_complete(data_dir, proj_dir, transfer_dir, time_delay)
 
