@@ -60,16 +60,18 @@ def init_logging(log_filename):
                         datefmt="%Y-%m-%dT%H:%M:%S%z")
     logging.info('Auto-archiver started')
 
-def make_archive(data_dir, proj_dir, sample_dir, run_dir, transfer_dir, file_type):
+def make_archive(run_dir_full, transfer_dir, file_type):
     '''
     Given directories for project, sample and run dirs,
     make tar.gz of report files and fast5 files, and
     make tar file for fastq files
     '''
-    #TODO: fix too many variables
     assert file_type in file_types
 
-    run_dir_full = os.path.join(data_dir, proj_dir, sample_dir, run_dir)
+    tmp, run_dir = os.path.split(run_dir_full)
+    tmp, sample_dir = os.path.split(tmp)
+    data_dir, proj_dir = os.path.split(tmp)
+
     transfer_dir = os.path.join(data_dir, proj_dir, transfer_dir)
     dest_dir = os.path.join(transfer_dir, file_type, sample_dir)
     os.makedirs(dest_dir, exist_ok=True)
@@ -162,7 +164,7 @@ def archive_runs_if_complete(data_dir, proj_dir, transfer_dir, time_delay):
                 if time.time() - os.path.getctime(run_file) > time_delay:
                     logging.info('Making archives...')
                     for file_type in file_types:
-                        make_archive(data_dir, proj_dir, sample_dir, run_dir, transfer_dir, file_type)
+                        make_archive(run_dir_full, transfer_dir, file_type)
                 else:
                     logging.info('Run %s has not been complete for %f seconds yet, skipping.',
                                  run_dir, time_delay)
