@@ -66,6 +66,16 @@ basedir = f'test/TEST_b/{sample}/{date}_1111_2F_{flowcellid}_{runhex}'
 make_run(basedir, subdirs, flowcellid, runhex, True)
 
 ### end test data creation ###
+def test_calculate_checksums():
+    run_dir = os.listdir('test/20221208_wehi_bowden_runa/sample_a')[0]
+    aa.calculate_checksums(f'test/20221208_wehi_bowden_runa/sample_a/{run_dir}',
+                           'test/20221208_wehi_bowden_runa/_transfer',
+                           '20221208_wehi_bowden_runa_checksums.sha1')
+    checksum_file = 'test/20221208_wehi_bowden_runa/_transfer/20221208_wehi_bowden_runa_checksums.sha1'
+    checksum_contents = []
+    for line in open(checksum_file, 'r'):
+        checksum_contents.append(line)
+    len(checksum_contents) == 6
 
 def test_make_archive():
     project_dirs = aa.get_project_dirs('test')
@@ -77,7 +87,7 @@ def test_make_archive():
 
 def test_archive_runs_if_complete():
     # complete run test
-    aa.archive_runs_if_complete('test', '20221208_wehi_bowden_runa', '_transfer', 0)
+    aa.archive_runs_if_complete('test', '20221208_wehi_bowden_runa', '_transfer', 0, False)
 
     rundir = 'test/20221208_wehi_bowden_runa'
     fast5_tar = glob.glob(f'{rundir}/_transfer/fast5/sample_a/*_fast5.tar.gz')
@@ -89,7 +99,7 @@ def test_archive_runs_if_complete():
     assert len(report_tar) == 1
 
     # complete run not within time delay
-    aa.archive_runs_if_complete('test', '20221208_wehi_bowden_runb', '_transfer', 600)
+    aa.archive_runs_if_complete('test', '20221208_wehi_bowden_runb', '_transfer', 600, False)
 
     rundir = 'test/20221208_wehi_bowden_runb'
     fast5_tar = glob.glob(f'{rundir}/_transfer/fast5/sample_a/*_fast5.tar.gz')
@@ -101,7 +111,7 @@ def test_archive_runs_if_complete():
     assert len(report_tar) == 0
 
     # incomplete run test
-    aa.archive_runs_if_complete('test', '20221208_wehi_bowden_runc', '_transfer', 0)
+    aa.archive_runs_if_complete('test', '20221208_wehi_bowden_runc', '_transfer', 0, False)
 
     rundir = 'test/20221208_wehi_bowden_runc'
     fast5_tar = glob.glob(f'{rundir}/_transfer/fast5/sample_a/*_fast5.tar.gz')

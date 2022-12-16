@@ -12,3 +12,6 @@ time_delay: 10
 # mask; use YAML lists for this arg
 extra_dirs:
     - 'TEST_b'
+
+# whether or not to calculate file checksums
+calculate_checksums: True

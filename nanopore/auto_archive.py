@@ -48,7 +48,6 @@ def parse_args(args):
                         help='Config file.')
     return parser.parse_args(args)
 
-
 def init_logging(log_filename):
     '''
     Initiate logging
@@ -60,7 +59,7 @@ def init_logging(log_filename):
                         datefmt="%Y-%m-%dT%H:%M:%S%z")
     logging.info('Auto-archiver started')
 
-def make_archive(run_dir_full, transfer_dir, file_type):
+def make_archive(run_dir_full, transfer_dir_full, file_type):
     '''
     Given directories for project, sample and run dirs,
     make tar.gz of report files and fast5 files, and
@@ -69,11 +68,9 @@ def make_archive(run_dir_full, transfer_dir, file_type):
     assert file_type in file_types
 
     tmp, run_dir = os.path.split(run_dir_full)
-    tmp, sample_dir = os.path.split(tmp)
-    data_dir, proj_dir = os.path.split(tmp)
+    sample_dir = os.path.split(tmp)[1]
 
-    transfer_dir = os.path.join(data_dir, proj_dir, transfer_dir)
-    dest_dir = os.path.join(transfer_dir, file_type, sample_dir)
+    dest_dir = os.path.join(transfer_dir_full, file_type, sample_dir)
     os.makedirs(dest_dir, exist_ok=True)
 
     success_file = os.path.join(run_dir_full, f'{run_dir}_{file_type}_archive.success')
@@ -119,6 +116,30 @@ def make_archive(run_dir_full, transfer_dir, file_type):
     else:
         logging.error('An error occured archiving %s for %s.', file_type, run_dir)
 
+def get_files(directory):
+    '''
+    Get relative path of all files in directory
+    Adapted from https://stackoverflow.com/questions/9816816/get-absolute-paths-of-all-files-in-a-directory
+    '''
+    for dirpath,_,filenames in os.walk(directory):
+        for f in filenames:
+            yield os.path.join(dirpath, f)
+
+def calculate_checksums(run_dir_full, transfer_dir_full, checksum_filename):
+    '''
+    Calculate sha1sum for all files in run directory
+    '''
+    os.makedirs(transfer_dir_full, exist_ok=True)
+    checksum_file = os.path.join(transfer_dir_full, checksum_filename)
+
+    with open(checksum_file, 'a') as cf:
+        for file in get_files(run_dir_full):
+            proc = subprocess.Popen(['shasum', '-a', '1', file],
+                                     stdout=cf,
+                                     stderr=subprocess.PIPE)
+            for line in proc.stderr:
+                logging.error(line)
+
 def get_project_dirs(data_dir):
     '''
     Iterate through directories in data_dir,
@@ -134,7 +155,7 @@ def get_project_dirs(data_dir):
             project_dirs.append(proj_dir)
     return project_dirs
 
-def archive_runs_if_complete(data_dir, proj_dir, transfer_dir, time_delay):
+def archive_runs_if_complete(data_dir, proj_dir, transfer_dir, time_delay, calc_checksums):
     '''
     Checks whether run is complete, if so,
     create one archive each for reports,
@@ -142,6 +163,7 @@ def archive_runs_if_complete(data_dir, proj_dir, transfer_dir, time_delay):
     '''
     logging.info('Processing %s...', proj_dir)
     sample_dirs = os.listdir(os.path.join(data_dir, proj_dir))
+    transfer_dir_full = os.path.join(data_dir, proj_dir, transfer_dir)
 
     # iterate through sample dirs
     for sample_dir in sample_dirs:
@@ -163,8 +185,12 @@ def archive_runs_if_complete(data_dir, proj_dir, transfer_dir, time_delay):
                 run_file = os.path.join(run_dir_full, eor_files[0])
                 if time.time() - os.path.getctime(run_file) > time_delay:
                     logging.info('Making archives...')
+                    if calc_checksums:
+                        logging.info('Calculating checksums for run %s', run_dir)
+                        checksum_filename = f'{run_dir}_checksums.sha1'
+                        calculate_checksums(run_dir_full, transfer_dir_full, checksum_filename)
                     for file_type in file_types:
-                        make_archive(run_dir_full, transfer_dir, file_type)
+                        make_archive(run_dir_full, transfer_dir_full, file_type)
                 else:
                     logging.info('Run %s has not been complete for %f seconds yet, skipping.',
                                  run_dir, time_delay)
@@ -187,6 +213,7 @@ def main():
     transfer_dir = config['transfer_dir']
     time_delay = config['time_delay']
     extra_dirs = config['extra_dirs']
+    calc_checksums = bool(config['calculate_checksums'])
 
     if not os.path.exists(data_dir):
         logging.error('Data directory does not exist, exiting.')
@@ -199,7 +226,7 @@ def main():
     project_dirs = get_project_dirs(data_dir)
     project_dirs = project_dirs + extra_dirs if extra_dirs else project_dirs
     for proj_dir in project_dirs:
-        archive_runs_if_complete(data_dir, proj_dir, transfer_dir, time_delay)
+        archive_runs_if_complete(data_dir, proj_dir, transfer_dir, time_delay, calc_checksums)
 
     logging.info('Done!')
 
