@@ -160,13 +160,30 @@ def calculate_checksums(run_dir_full, transfer_dir_full, checksum_filename):
     os.makedirs(transfer_dir_full, exist_ok=True)
     checksum_file = os.path.join(transfer_dir_full, checksum_filename)
 
+    run_dir = os.path.split(run_dir_full)[1]
+    success_file = os.path.join(run_dir_full, f'{run_dir}_checksums.success')
+    if os.path.exists(success_file):
+        # nothing to do as checksums were already calculated
+        logging.info('Skipped checksums for run %s due to presence of success file.', run_dir)
+        return
+
+    error = 0
     with open(checksum_file, 'a') as cfile:
         for file in get_files(run_dir_full):
+            if os.path.splitext(file)[1] == '.success':
+                continue
             proc = subprocess.Popen(['shasum', '-a', '1', file],
                                      stdout=cfile,
                                      stderr=subprocess.PIPE)
             for line in proc.stderr:
                 logging.error(line)
+
+            # check for errors
+            return_code = proc.wait()
+            error = return_code if return_code != 0 else error
+
+    if error == 0:
+        open(success_file, 'w').close()
 
 def get_project_dirs(data_dir):
     '''
