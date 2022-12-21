@@ -59,7 +59,54 @@ def init_logging(log_filename):
                         datefmt="%Y-%m-%dT%H:%M:%S%z")
     logging.info('Auto-archiver started')
 
-def make_archive(run_dir_full, transfer_dir_full, file_type):
+def run_tar(tar_file, files_to_archive, run_dir_full, file_type, threads=1):
+    '''
+    Archive data using tar and pigz (if using multi-threading)
+    '''
+    # check that all files/folders exist
+    for file in files_to_archive:
+        full_file_path = os.path.join(run_dir_full, file)
+        if not os.path.exists(full_file_path):
+            logging.error('%s does not exist!', full_file_path)
+            return
+
+    # do not use gzip compression if multithreaded (handled by pigz)
+    # or archiving fastqs (already in gz format)
+    tar_args = '-cpvf' if file_type == 'fastq' or threads > 1 else '-czpvf'
+    if threads > 1 and file_type != 'fastq':
+        with open(tar_file, 'w') as tout:
+            proc0 = subprocess.Popen(['tar', tar_args, '-'] + files_to_archive,
+                                     cwd=run_dir_full,
+                                     stdout=subprocess.PIPE,
+                                     stderr=subprocess.PIPE)
+            proc1 = subprocess.Popen(['pigz', '-p', str(threads), '-k'],
+                                     stdin=proc0.stdout,
+                                     stdout=tout,
+                                     stderr=subprocess.PIPE)
+            for line in proc0.stderr:
+                logging.info(bytes.decode(line).strip())
+
+            for line in proc1.stderr:
+                logging.info(bytes.decode(line).strip())
+            return_code = proc1.wait()
+    else:
+        proc = subprocess.Popen(['tar', tar_args, tar_file] + files_to_archive,
+                                 cwd=run_dir_full,
+                                 stdout=subprocess.PIPE,
+                                 stderr=subprocess.STDOUT)
+        for line in proc.stdout:
+            logging.info(bytes.decode(line).strip())
+        return_code = proc.wait()
+
+    run_dir = os.path.split(run_dir_full)[1]
+    success_file = os.path.join(run_dir_full, f'{run_dir}_{file_type}_archive.success')
+    if return_code == 0:
+        open(success_file, 'w').close()
+        logging.info('Successfully archived %s files for %s.', file_type, run_dir)
+    else:
+        logging.error('An error occured archiving %s for %s.', file_type, run_dir)
+
+def make_archive(run_dir_full, transfer_dir_full, file_type, threads):
     '''
     Given directories for project, sample and run dirs,
     make tar.gz of report files and fast5 files, and
@@ -79,7 +126,6 @@ def make_archive(run_dir_full, transfer_dir_full, file_type):
         logging.info('Skipped %s for run %s due to presence of success file.', file_type, run_dir)
         return
 
-    tar_args = '-cpvf' if file_type == 'fastq' else '-czpvf' # don't need to zip fastqs
     ext = 'tar' if file_type == 'fastq' else 'tar.gz'
     tar_file = os.path.join(dest_dir, f'{run_dir}_{file_type}.{ext}')
     tar_file = os.path.abspath(tar_file) # need absolute path for tar to get put in right place
@@ -96,25 +142,7 @@ def make_archive(run_dir_full, transfer_dir_full, file_type):
     elif file_type == 'fastq':
         files_to_archive = ['fastq_pass', 'fastq_fail']
 
-    for file in files_to_archive:
-        full_file_path = os.path.join(run_dir_full, file)
-        if not os.path.exists(full_file_path):
-            logging.error('%s does not exist!', full_file_path)
-            return
-
-    proc = subprocess.Popen(['tar', tar_args, tar_file] + files_to_archive,
-                             cwd=run_dir_full,
-                             stdout=subprocess.PIPE,
-                             stderr=subprocess.STDOUT)
-    for line in proc.stdout:
-        logging.info(bytes.decode(line).strip())
-
-    return_code = proc.wait()
-    if return_code == 0:
-        open(success_file, 'w').close()
-        logging.info('Successfully archived %s files for %s.', file_type, run_dir)
-    else:
-        logging.error('An error occured archiving %s for %s.', file_type, run_dir)
+    run_tar(tar_file, files_to_archive, run_dir_full, file_type, threads=threads)
 
 def get_files(directory):
     '''
@@ -122,8 +150,8 @@ def get_files(directory):
     Adapted from https://stackoverflow.com/questions/9816816/get-absolute-paths-of-all-files-in-a-directory
     '''
     for dirpath,_,filenames in os.walk(directory):
-        for f in filenames:
-            yield os.path.join(dirpath, f)
+        for file in filenames:
+            yield os.path.join(dirpath, file)
 
 def calculate_checksums(run_dir_full, transfer_dir_full, checksum_filename):
     '''
@@ -132,10 +160,10 @@ def calculate_checksums(run_dir_full, transfer_dir_full, checksum_filename):
     os.makedirs(transfer_dir_full, exist_ok=True)
     checksum_file = os.path.join(transfer_dir_full, checksum_filename)
 
-    with open(checksum_file, 'a') as cf:
+    with open(checksum_file, 'a') as cfile:
         for file in get_files(run_dir_full):
             proc = subprocess.Popen(['shasum', '-a', '1', file],
-                                     stdout=cf,
+                                     stdout=cfile,
                                      stderr=subprocess.PIPE)
             for line in proc.stderr:
                 logging.error(line)
@@ -155,7 +183,7 @@ def get_project_dirs(data_dir):
             project_dirs.append(proj_dir)
     return project_dirs
 
-def archive_runs_if_complete(data_dir, proj_dir, transfer_dir, time_delay, calc_checksums):
+def archive_runs_if_complete(data_dir, proj_dir, transfer_dir, time_delay, calc_checksums, threads):
     '''
     Checks whether run is complete, if so,
     create one archive each for reports,
@@ -190,7 +218,7 @@ def archive_runs_if_complete(data_dir, proj_dir, transfer_dir, time_delay, calc_
                         checksum_filename = f'{run_dir}_checksums.sha1'
                         calculate_checksums(run_dir_full, transfer_dir_full, checksum_filename)
                     for file_type in file_types:
-                        make_archive(run_dir_full, transfer_dir_full, file_type)
+                        make_archive(run_dir_full, transfer_dir_full, file_type, threads)
                 else:
                     logging.info('Run %s has not been complete for %f seconds yet, skipping.',
                                  run_dir, time_delay)
@@ -206,14 +234,15 @@ def main():
         logging.error('Config file does not exist, exiting.')
         sys.exit()
 
-    stream = open(args.config, 'r')
-    config = yaml.load(stream, yaml.SafeLoader)
+    with open(args.config, 'r') as stream:
+        config = yaml.load(stream, yaml.SafeLoader)
 
     data_dir = config['data_dir']
     transfer_dir = config['transfer_dir']
     time_delay = config['time_delay']
     extra_dirs = config['extra_dirs']
     calc_checksums = bool(config['calculate_checksums'])
+    threads = int(config['threads'])
 
     if not os.path.exists(data_dir):
         logging.error('Data directory does not exist, exiting.')
@@ -226,7 +255,7 @@ def main():
     project_dirs = get_project_dirs(data_dir)
     project_dirs = project_dirs + extra_dirs if extra_dirs else project_dirs
     for proj_dir in project_dirs:
-        archive_runs_if_complete(data_dir, proj_dir, transfer_dir, time_delay, calc_checksums)
+        archive_runs_if_complete(data_dir, proj_dir, transfer_dir, time_delay, calc_checksums, threads)
 
     logging.info('Done!')
 

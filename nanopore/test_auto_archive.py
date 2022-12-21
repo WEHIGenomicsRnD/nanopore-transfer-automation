@@ -87,7 +87,7 @@ def test_make_archive():
 
 def test_archive_runs_if_complete():
     # complete run test
-    aa.archive_runs_if_complete('test', '20221208_wehi_bowden_runa', '_transfer', 0, False)
+    aa.archive_runs_if_complete('test', '20221208_wehi_bowden_runa', '_transfer', 0, False, 1)
 
     rundir = 'test/20221208_wehi_bowden_runa'
     fast5_tar = glob.glob(f'{rundir}/_transfer/fast5/sample_a/*_fast5.tar.gz')
@@ -99,7 +99,7 @@ def test_archive_runs_if_complete():
     assert len(report_tar) == 1
 
     # complete run not within time delay
-    aa.archive_runs_if_complete('test', '20221208_wehi_bowden_runb', '_transfer', 600, False)
+    aa.archive_runs_if_complete('test', '20221208_wehi_bowden_runb', '_transfer', 600, False, 1)
 
     rundir = 'test/20221208_wehi_bowden_runb'
     fast5_tar = glob.glob(f'{rundir}/_transfer/fast5/sample_a/*_fast5.tar.gz')
@@ -110,8 +110,20 @@ def test_archive_runs_if_complete():
     assert len(fastq_tar) == 0
     assert len(report_tar) == 0
 
+    # test multiple threads
+    aa.archive_runs_if_complete('test', '20221208_wehi_bowden_runb', '_transfer', 0, False, 2)
+
+    rundir = 'test/20221208_wehi_bowden_runb'
+    fast5_tar = glob.glob(f'{rundir}/_transfer/fast5/sample_a/*_fast5.tar.gz')
+    fastq_tar = glob.glob(f'{rundir}/_transfer/fastq/sample_a/*_fastq.tar')
+    report_tar = glob.glob(f'{rundir}/_transfer/reports/sample_a/*_reports.tar.gz')
+
+    assert len(fast5_tar) == 1
+    assert len(fastq_tar) == 1
+    assert len(report_tar) == 1
+
     # incomplete run test
-    aa.archive_runs_if_complete('test', '20221208_wehi_bowden_runc', '_transfer', 0, False)
+    aa.archive_runs_if_complete('test', '20221208_wehi_bowden_runc', '_transfer', 0, False, 1)
 
     rundir = 'test/20221208_wehi_bowden_runc'
     fast5_tar = glob.glob(f'{rundir}/_transfer/fast5/sample_a/*_fast5.tar.gz')

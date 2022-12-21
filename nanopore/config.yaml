@@ -15,3 +15,7 @@ extra_dirs:
 
 # whether or not to calculate file checksums
 calculate_checksums: True
+
+# NOTE that threads > 1 requires
+# pigz to be installed
+threads: 1
