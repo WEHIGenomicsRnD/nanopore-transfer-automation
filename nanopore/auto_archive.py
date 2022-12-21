@@ -244,7 +244,8 @@ def main():
     '''
     Main function
     '''
-    init_logging('auto_archive_{:%Y-%m-%d_%H%M}.log'.format(datetime.now()))
+    os.makedirs('logs', exist_ok=True)
+    init_logging('logs/auto_archive_{:%Y-%m-%d_%H%M}.log'.format(datetime.now()))
 
     args = parse_args(sys.argv[1:])
     if not os.path.exists(args.config):
