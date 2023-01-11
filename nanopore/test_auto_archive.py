@@ -65,6 +65,9 @@ sample = samples[0]
 basedir = f'test/TEST_b/{sample}/{date}_1111_2F_{flowcellid}_{runhex}'
 make_run(basedir, subdirs, flowcellid, runhex, True)
 
+file_types = ['reports', 'fastq', 'fast5']
+proj_dir_regex = r'^(\d{8})_([a-zA-Z0-9\-]+)_([a-zA-Z0-9\-]+)_([a-zA-Z0-9\-]+)$'
+
 ### end test data creation ###
 def test_calculate_checksums():
     run_dir = os.listdir('test/20221208_wehi_bowden_runa/sample_a')[0]
@@ -78,7 +81,7 @@ def test_calculate_checksums():
     len(checksum_contents) == 6
 
 def test_make_archive():
-    project_dirs = aa.get_project_dirs('test')
+    project_dirs = aa.get_project_dirs('test', proj_dir_regex)
     project_dirs_truth = ['20221208_wehi_bowden_runa',
                           '20221208_wehi_bowden_runb',
                           '20221208_wehi_bowden_runc']
@@ -86,8 +89,14 @@ def test_make_archive():
     assert len(project_dirs) == len(project_dirs_truth)
 
 def test_archive_runs_if_complete():
+    config = {'transfer_dir': '_transfer',
+              'time_delay': 0,
+              'calculate_checksums': False,
+              'threads': 1,
+              'proj_dir_regex': proj_dir_regex}
+
     # complete run test
-    aa.archive_runs_if_complete('test', '20221208_wehi_bowden_runa', '_transfer', 0, False, 1)
+    aa.archive_runs_if_complete('test', '20221208_wehi_bowden_runa', file_types, config)
 
     rundir = 'test/20221208_wehi_bowden_runa'
     fast5_tar = glob.glob(f'{rundir}/_transfer/fast5/sample_a/*_fast5.tar.gz')
@@ -98,8 +107,21 @@ def test_archive_runs_if_complete():
     assert len(fastq_tar) == 1
     assert len(report_tar) == 1
 
+    # incomplete run test
+    aa.archive_runs_if_complete('test', '20221208_wehi_bowden_runc', file_types, config)
+
+    rundir = 'test/20221208_wehi_bowden_runc'
+    fast5_tar = glob.glob(f'{rundir}/_transfer/fast5/sample_a/*_fast5.tar.gz')
+    fastq_tar = glob.glob(f'{rundir}/_transfer/fastq/sample_a/*_fastq.tar')
+    report_tar = glob.glob(f'{rundir}/_transfer/reports/sample_a/*_reports.tar.gz')
+
+    assert len(fast5_tar) == 0
+    assert len(fastq_tar) == 0
+    assert len(report_tar) == 0
+
     # complete run not within time delay
-    aa.archive_runs_if_complete('test', '20221208_wehi_bowden_runb', '_transfer', 600, False, 1)
+    config['time_delay'] = 600
+    aa.archive_runs_if_complete('test', '20221208_wehi_bowden_runb', file_types, config)
 
     rundir = 'test/20221208_wehi_bowden_runb'
     fast5_tar = glob.glob(f'{rundir}/_transfer/fast5/sample_a/*_fast5.tar.gz')
@@ -111,7 +133,9 @@ def test_archive_runs_if_complete():
     assert len(report_tar) == 0
 
     # test multiple threads
-    aa.archive_runs_if_complete('test', '20221208_wehi_bowden_runb', '_transfer', 0, False, 2)
+    config['time_delay'] = 0
+    config['threads'] = 2
+    aa.archive_runs_if_complete('test', '20221208_wehi_bowden_runb', file_types, config)
 
     rundir = 'test/20221208_wehi_bowden_runb'
     fast5_tar = glob.glob(f'{rundir}/_transfer/fast5/sample_a/*_fast5.tar.gz')
@@ -122,14 +146,5 @@ def test_archive_runs_if_complete():
     assert len(fastq_tar) == 1
     assert len(report_tar) == 1
 
-    # incomplete run test
-    aa.archive_runs_if_complete('test', '20221208_wehi_bowden_runc', '_transfer', 0, False, 1)
 
-    rundir = 'test/20221208_wehi_bowden_runc'
-    fast5_tar = glob.glob(f'{rundir}/_transfer/fast5/sample_a/*_fast5.tar.gz')
-    fastq_tar = glob.glob(f'{rundir}/_transfer/fastq/sample_a/*_fastq.tar')
-    report_tar = glob.glob(f'{rundir}/_transfer/reports/sample_a/*_reports.tar.gz')
 
-    assert len(fast5_tar) == 0
-    assert len(fastq_tar) == 0
-    assert len(report_tar) == 0

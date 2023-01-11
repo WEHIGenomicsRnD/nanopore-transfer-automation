@@ -23,8 +23,8 @@ from argparse import ArgumentParser
 from datetime import datetime
 import yaml
 
-file_types = ['reports', 'fastq', 'fast5']
-proj_dir_regex = re.compile(r'^(\d{8})_([a-zA-Z0-9\-]+)_([a-zA-Z0-9\-]+)_([a-zA-Z0-9\-]+)$')
+POSSIBLE_FILE_TYPES = ['reports', 'fastq', 'fast5']
+
 end_of_run_file_regex = re.compile(r'^sequencing_summary\w*\.txt')
 
 def parse_args(args):
@@ -112,8 +112,6 @@ def make_archive(run_dir_full, transfer_dir_full, file_type, threads):
     make tar.gz of report files and fast5 files, and
     make tar file for fastq files
     '''
-    assert file_type in file_types
-
     tmp, run_dir = os.path.split(run_dir_full)
     sample_dir = os.path.split(tmp)[1]
 
@@ -147,7 +145,8 @@ def make_archive(run_dir_full, transfer_dir_full, file_type, threads):
 def get_files(directory):
     '''
     Get relative path of all files in directory
-    Adapted from https://stackoverflow.com/questions/9816816/get-absolute-paths-of-all-files-in-a-directory
+    Adapted from
+    https://stackoverflow.com/questions/9816816/get-absolute-paths-of-all-files-in-a-directory
     '''
     for dirpath,_,filenames in os.walk(directory):
         for file in filenames:
@@ -185,7 +184,7 @@ def calculate_checksums(run_dir_full, transfer_dir_full, checksum_filename):
     if error == 0:
         open(success_file, 'w').close()
 
-def get_project_dirs(data_dir):
+def get_project_dirs(data_dir, proj_dir_regex):
     '''
     Iterate through directories in data_dir,
     check whether each directory matches the
@@ -200,13 +199,19 @@ def get_project_dirs(data_dir):
             project_dirs.append(proj_dir)
     return project_dirs
 
-def archive_runs_if_complete(data_dir, proj_dir, transfer_dir, time_delay, calc_checksums, threads):
+def archive_runs_if_complete(data_dir, proj_dir, file_types, config):
     '''
     Checks whether run is complete, if so,
     create one archive each for reports,
     fast5 and fastq files.
     '''
     logging.info('Processing %s...', proj_dir)
+
+    transfer_dir = config['transfer_dir']
+    time_delay = config['time_delay']
+    calc_checksums = bool(config['calculate_checksums'])
+    threads = int(config['threads'])
+
     sample_dirs = os.listdir(os.path.join(data_dir, proj_dir))
     transfer_dir_full = os.path.join(data_dir, proj_dir, transfer_dir)
 
@@ -256,11 +261,9 @@ def main():
         config = yaml.load(stream, yaml.SafeLoader)
 
     data_dir = config['data_dir']
-    transfer_dir = config['transfer_dir']
-    time_delay = config['time_delay']
     extra_dirs = config['extra_dirs']
-    calc_checksums = bool(config['calculate_checksums'])
-    threads = int(config['threads'])
+    file_types = config['file_types']
+    proj_dir_regex = re.compile(r'%s' % config['proj_dir_regex'])
 
     if not os.path.exists(data_dir):
         logging.error('Data directory does not exist, exiting.')
@@ -270,10 +273,19 @@ def main():
         logging.error('extra_dirs argument is not a list or empty, exiting.')
         sys.exit()
 
-    project_dirs = get_project_dirs(data_dir)
+    if not isinstance(file_types, list) and file_types:
+        logging.error('file_types argument is not a list or empty, exiting.')
+        sys.exit()
+
+    for file_type in file_types:
+        if file_type not in POSSIBLE_FILE_TYPES:
+            logging.error('Invalid file type %s specified.', file_type)
+            sys.exit()
+
+    project_dirs = get_project_dirs(data_dir, proj_dir_regex)
     project_dirs = project_dirs + extra_dirs if extra_dirs else project_dirs
     for proj_dir in project_dirs:
-        archive_runs_if_complete(data_dir, proj_dir, transfer_dir, time_delay, calc_checksums, threads)
+        archive_runs_if_complete(data_dir, proj_dir, file_types, config)
 
     logging.info('Done!')
 

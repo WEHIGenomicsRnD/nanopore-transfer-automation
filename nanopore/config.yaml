@@ -4,6 +4,18 @@ data_dir: 'test'
 # what to call directory for transfer
 transfer_dir: '_transfer'
 
+# file types to process in a list
+# each item must match one of
+# 'fastq', 'fast5' or 'reports'
+file_types:
+    - 'reports'
+    - 'fastq'
+    - 'fast5'
+
+# project directory regex (do not change
+# unless you know what you are doing)
+proj_dir_regex: '^(\d{8})_([a-zA-Z0-9\-]+)_([a-zA-Z0-9\-]+)_([a-zA-Z0-9\-]+)$'
+
 # minimum number of seconds a run needs
 # to be finished before archiving
 time_delay: 10
