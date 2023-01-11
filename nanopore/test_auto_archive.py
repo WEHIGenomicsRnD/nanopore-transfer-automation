@@ -74,7 +74,7 @@ def test_calculate_checksums():
     aa.calculate_checksums(f'test/20221208_wehi_bowden_runa/sample_a/{run_dir}',
                            'test/20221208_wehi_bowden_runa/_transfer',
                            '20221208_wehi_bowden_runa_checksums.sha1')
-    checksum_file = 'test/20221208_wehi_bowden_runa/_transfer/20221208_wehi_bowden_runa_checksums.sha1'
+    checksum_file = 'test/20221208_wehi_bowden_runa/_transfer/checksums/20221208_wehi_bowden_runa_checksums.sha1'
     checksum_contents = []
     for line in open(checksum_file, 'r'):
         checksum_contents.append(line)

@@ -156,8 +156,9 @@ def calculate_checksums(run_dir_full, transfer_dir_full, checksum_filename):
     '''
     Calculate sha1sum for all files in run directory
     '''
-    os.makedirs(transfer_dir_full, exist_ok=True)
-    checksum_file = os.path.join(transfer_dir_full, checksum_filename)
+    dest_dir = os.path.join(transfer_dir_full, 'checksums')
+    os.makedirs(dest_dir, exist_ok=True)
+    checksum_file = os.path.join(dest_dir, checksum_filename)
 
     run_dir = os.path.split(run_dir_full)[1]
     success_file = os.path.join(run_dir_full, f'{run_dir}_checksums.success')
