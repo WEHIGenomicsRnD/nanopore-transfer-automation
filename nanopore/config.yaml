@@ -14,7 +14,7 @@ file_types:
 
 # project directory regex (do not change
 # unless you know what you are doing)
-proj_dir_regex: '^(\d{8})_([a-zA-Z0-9\-]+)_([a-zA-Z0-9\-]+)_([a-zA-Z0-9\-]+)$'
+proj_dir_regex: '^(\d{6,8})_([a-zA-Z0-9\-]+)_([a-zA-Z0-9\-]+)_([a-zA-Z0-9\-_]+)$'
 
 # minimum number of seconds a run needs
 # to be finished before archiving

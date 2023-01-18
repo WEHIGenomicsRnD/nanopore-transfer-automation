@@ -66,7 +66,7 @@ basedir = f'test/TEST_b/{sample}/{date}_1111_2F_{flowcellid}_{runhex}'
 make_run(basedir, subdirs, flowcellid, runhex, True)
 
 file_types = ['reports', 'fastq', 'fast5']
-proj_dir_regex = r'^(\d{8})_([a-zA-Z0-9\-]+)_([a-zA-Z0-9\-]+)_([a-zA-Z0-9\-]+)$'
+proj_dir_regex = r'^(\d{6,8})_([a-zA-Z0-9\-]+)_([a-zA-Z0-9\-]+)_([a-zA-Z0-9\-_]+)$'
 
 ### end test data creation ###
 def test_calculate_checksums():
