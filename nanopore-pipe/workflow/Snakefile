@@ -1,0 +1,26 @@
+from snakemake.utils import min_version
+
+# ------------- min snakemake version ------------
+min_version("6.7.0")
+
+
+# ------------- setup ------------
+configfile: "config/config.yaml"
+
+
+report: "report/workflow.rst"
+
+
+# ------------- load rules ------------
+
+
+include: "rules/common.smk"
+include: "rules/archive.smk"
+
+
+# ------------- workflow ------------
+
+
+rule all:
+    input:
+        get_outputs(file_types),
