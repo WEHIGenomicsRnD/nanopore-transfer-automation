@@ -1,0 +1,43 @@
+# directory containing runs (MUST be an absolute path)
+data_dir: '/github/workspace/nanopore-pipe/.test/test_data'
+
+# what to call directory for transfer
+transfer_dir: '_transfer'
+
+# file types to process in a list
+# each item must match one of
+# 'fastq', 'fast5', 'reports'
+# or checksums
+file_types:
+    - 'reports'
+    - 'fastq'
+    - 'fast5'
+    - 'checksums'
+
+# project directory regex (do not change
+# unless you know what you are doing)
+proj_dir_regex: '^(\d{6,8})_([a-zA-Z0-9\-]+)_([a-zA-Z0-9\-]+)_([a-zA-Z0-9\-_]+)$'
+
+# regex of run file that signifies that
+# the run has finished (do not change
+# unless you know what you are doing)
+end_of_run_file_regex: '^sequencing_summary\w*\.txt'
+
+# check if run is complete before processing
+check_if_complete: False
+
+# minimum number of seconds a run needs
+# to be finished before archiving
+time_delay: 10
+
+# directories exempt from the standard
+# mask; use YAML lists for this arg
+extra_dirs:
+    - 'TEST_b'
+
+# set true if you only want to run the
+# script on *only* the extra_dirs set above
+ignore_proj_regex: False
+
+# number of threads to use
+threads: 12

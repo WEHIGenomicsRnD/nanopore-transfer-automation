@@ -23,7 +23,7 @@ if not os.path.exists(data_dir):
 
 if not os.path.isabs(data_dir):
     print("Data directory path is not absolute, exiting.", file=sys.stderr)
-    sys.exit()    
+    sys.exit()
 
 if not isinstance(extra_dirs, list) and extra_dirs:
     print("extra_dirs argument is not a list or empty, exiting.", file=sys.stderr)
@@ -39,7 +39,10 @@ for file_type in file_types:
         sys.exit()
 
 if ignore_proj_regex and not extra_dirs:
-    print("Invalid parameters: extra_dirs must be specified if ignoring project regex.", file=sys.stderr)
+    print(
+        "Invalid parameters: extra_dirs must be specified if ignoring project regex.",
+        file=sys.stderr,
+    )
     sys.exit()
 
 # functions
@@ -58,6 +61,7 @@ def get_project_dirs(data_dir, proj_dir_regex):
             project_dirs.append(proj_dir)
     return project_dirs
 
+
 def is_run_complete(sample_dir):
     """
     Checks whether run is complete for a given sample,
@@ -72,6 +76,7 @@ def is_run_complete(sample_dir):
         run_complete.append(len(eor_files) > 0)
     return any(run_complete)
 
+
 project_dirs = []
 if ignore_proj_regex and extra_dirs:
     project_dirs = extra_dirs
@@ -83,7 +88,9 @@ projects, samples = [], []
 for project in project_dirs:
     project_dir_full = os.path.join(data_dir, project)
     samples_in_project = next(os.walk(project_dir_full))[1]
-    samples_in_project = filter(lambda sample: sample != "_transfer", samples_in_project)
+    samples_in_project = filter(
+        lambda sample: sample != "_transfer", samples_in_project
+    )
 
     # add both projects and sample to keep their association together
     for sample in samples_in_project:
@@ -95,28 +102,44 @@ for project in project_dirs:
 
 # input/output functions
 def get_report_outputs():
-    report_outputs = [f"{data_dir}/{project}/_transfer/reports/{sample}_reports.tar.gz" for project, sample in zip(projects, samples)]
+    report_outputs = [
+        f"{data_dir}/{project}/_transfer/reports/{sample}_reports.tar.gz"
+        for project, sample in zip(projects, samples)
+    ]
     return report_outputs
 
+
 def get_checksum_outputs():
-    checksum_outputs = [f"{data_dir}/{project}/_transfer/checksums/{sample}.sha1" for project, sample in zip(projects, samples)]
+    checksum_outputs = [
+        f"{data_dir}/{project}/_transfer/checksums/{sample}.sha1"
+        for project, sample in zip(projects, samples)
+    ]
     return checksum_outputs
 
+
 def get_fastq_outputs():
-    fastq_outputs = [f"{data_dir}/{project}/_transfer/fastq/{sample}_fastq_{{state}}.tar" for project, sample in zip(projects, samples)]
+    fastq_outputs = [
+        f"{data_dir}/{project}/_transfer/fastq/{sample}_fastq_{{state}}.tar"
+        for project, sample in zip(projects, samples)
+    ]
     fastq_outputs = expand(
         fastq_outputs,
         state=STATES,
     )
     return fastq_outputs
 
+
 def get_fast5_outputs():
-    fast5_outputs = [f"{data_dir}/{project}/_transfer/fast5/{sample}_fast5_{{state}}.tar.gz" for project, sample in zip(projects, samples)]
+    fast5_outputs = [
+        f"{data_dir}/{project}/_transfer/fast5/{sample}_fast5_{{state}}.tar.gz"
+        for project, sample in zip(projects, samples)
+    ]
     fast5_outputs = expand(
         fast5_outputs,
         state=STATES,
     )
     return fast5_outputs
+
 
 def get_outputs(file_types):
     outputs = []
@@ -129,3 +152,12 @@ def get_outputs(file_types):
     if "fast5" in file_types:
         outputs.extend(get_fast5_outputs())
     return outputs
+
+
+def get_final_checksum_outputs():
+    final_checksum_outputs = expand(
+        "{data_dir}/{project}/_transfer/final_checksums/archives.sha1",
+        data_dir=data_dir,
+        project=np.unique(projects),
+    )
+    return final_checksum_outputs

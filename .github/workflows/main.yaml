@@ -1,0 +1,58 @@
+name: Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  formatting:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - uses: actions/checkout@v1
+    - name: Formatting
+      uses: github/super-linter@v4
+      env:
+        VALIDATE_ALL_CODEBASE: false
+        DEFAULT_BRANCH: main
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        VALIDATE_SNAKEMAKE_SNAKEFMT: true
+
+  linting:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - uses: actions/checkout@v1
+    - name: Set up test data
+      working-directory: nanopore-pipe/.test
+      run: |
+        python make_test_data.py
+
+  run-workflow:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with:
+        submodules: recursive
+
+    - name: Download test data
+      working-directory: nanopore-pipe/.test
+      run: |
+        python make_test_data.py
+
+    - name: Test workflow
+      uses: snakemake/snakemake-github-action@v1.23.0      
+      with:
+        directory: nanopore-pipe/.test
+        snakefile: nanopore-pipe/workflow/Snakefile
+        args: "--use-conda --show-failed-logs --cores 2 --conda-cleanup-pkgs cache --all-temp"

@@ -24,3 +24,4 @@ include: "rules/archive.smk"
 rule all:
     input:
         get_outputs(file_types),
+        get_final_checksum_outputs(),
