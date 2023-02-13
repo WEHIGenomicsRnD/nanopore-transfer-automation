@@ -10,6 +10,7 @@ STATES = ["pass", "fail"]
 data_dir = config["data_dir"]
 transfer_dir = config["transfer_dir"]
 extra_dirs = config["extra_dirs"]
+ignore_dirs = config["ignore_dirs"]
 file_types = config["file_types"]
 proj_dir_regex = re.compile(r"%s" % config["proj_dir_regex"])
 end_of_run_file_regex = re.compile(r"%s" % config["end_of_run_file_regex"])
@@ -27,6 +28,10 @@ if not os.path.isabs(data_dir):
 
 if not isinstance(extra_dirs, list) and extra_dirs:
     print("extra_dirs argument is not a list or empty, exiting.", file=sys.stderr)
+    sys.exit()
+
+if not isinstance(ignore_dirs, list) and ignore_dirs:
+    print("ignore_dirs argument is not a list or empty, exiting.", file=sys.stderr)
     sys.exit()
 
 if not isinstance(file_types, list) and file_types:
@@ -77,12 +82,15 @@ def is_run_complete(sample_dir):
     return any(run_complete)
 
 
+# build list of projects and samples to archive
 project_dirs = []
 if ignore_proj_regex and extra_dirs:
     project_dirs = extra_dirs
 else:
     project_dirs = get_project_dirs(data_dir, proj_dir_regex)
     project_dirs = project_dirs + extra_dirs if extra_dirs else project_dirs
+
+project_dirs = filter(lambda project: project not in ignore_dirs, project_dirs)
 
 projects, samples = [], []
 for project in project_dirs:

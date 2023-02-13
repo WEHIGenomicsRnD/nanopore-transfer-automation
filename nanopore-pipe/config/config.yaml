@@ -35,6 +35,10 @@ time_delay: 10
 extra_dirs:
     - 'TEST_b'
 
+# do not process these directories
+ignore_dirs:
+    - ''
+
 # set true if you only want to run the
 # script on *only* the extra_dirs set above
 ignore_proj_regex: False
