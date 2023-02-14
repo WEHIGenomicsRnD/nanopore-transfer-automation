@@ -3,7 +3,7 @@ rule calculate_checksums:
         [f"{data_dir}/{project}/{sample}" for project, sample in zip(projects, samples)],
     output:
         expand(
-            "{data_dir}/{{project}}/{transfer_dir}/checksums/{{sample}}.sha1",
+            "{data_dir}/{{project}}/{transfer_dir}/checksums/{{project}}_{{sample}}.sha1",
             data_dir=data_dir,
             transfer_dir=transfer_dir,
         ),
@@ -26,7 +26,7 @@ rule tar_reports:
         [f"{data_dir}/{project}/{sample}" for project, sample in zip(projects, samples)],
     output:
         expand(
-            "{data_dir}/{{project}}/{transfer_dir}/reports/{{sample}}_reports.tar.gz",
+            "{data_dir}/{{project}}/{transfer_dir}/reports/{{project}}_{{sample}}_reports.tar.gz",
             data_dir=data_dir,
             transfer_dir=transfer_dir,
         ),
@@ -49,7 +49,7 @@ rule tar_fastqs:
         [f"{data_dir}/{project}/{sample}" for project, sample in zip(projects, samples)],
     output:
         expand(
-            "{data_dir}/{{project}}/{transfer_dir}/fastq/{{sample}}_fastq_{{state}}.tar",
+            "{data_dir}/{{project}}/{transfer_dir}/fastq/{{project}}_{{sample}}_fastq_{{state}}.tar",
             data_dir=data_dir,
             transfer_dir=transfer_dir,
             state=STATES,
@@ -74,7 +74,7 @@ rule tar_fast5s:
         [f"{data_dir}/{project}/{sample}" for project, sample in zip(projects, samples)],
     output:
         expand(
-            "{data_dir}/{{project}}/{transfer_dir}/fast5/{{sample}}_fast5_{{state}}.tar.gz",
+            "{data_dir}/{{project}}/{transfer_dir}/fast5/{{project}}_{{sample}}_fast5_{{state}}.tar.gz",
             data_dir=data_dir,
             transfer_dir=transfer_dir,
             state=STATES,
@@ -99,7 +99,11 @@ rule calculate_archive_checksums:
     input:
         get_outputs(file_types),
     output:
-        f"{data_dir}/{{project}}/final_checksums/archives.sha1",
+        expand(
+            "{data_dir}/{{project}}/{transfer_dir}/final_checksums/{{project}}_archives.sha1",
+            data_dir=data_dir,
+            transfer_dir=transfer_dir,
+        ),
     log:
         "logs/{project}_archive_checksums.log",
     threads: 1

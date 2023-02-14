@@ -111,7 +111,7 @@ for project in project_dirs:
 # input/output functions
 def get_report_outputs():
     report_outputs = [
-        f"{data_dir}/{project}/_transfer/reports/{sample}_reports.tar.gz"
+        f"{data_dir}/{project}/_transfer/reports/{project}_{sample}_reports.tar.gz"
         for project, sample in zip(projects, samples)
     ]
     return report_outputs
@@ -119,7 +119,7 @@ def get_report_outputs():
 
 def get_checksum_outputs():
     checksum_outputs = [
-        f"{data_dir}/{project}/_transfer/checksums/{sample}.sha1"
+        f"{data_dir}/{project}/_transfer/checksums/{project}_{sample}.sha1"
         for project, sample in zip(projects, samples)
     ]
     return checksum_outputs
@@ -127,7 +127,7 @@ def get_checksum_outputs():
 
 def get_fastq_outputs():
     fastq_outputs = [
-        f"{data_dir}/{project}/_transfer/fastq/{sample}_fastq_{{state}}.tar"
+        f"{data_dir}/{project}/_transfer/fastq/{project}_{sample}_fastq_{{state}}.tar"
         for project, sample in zip(projects, samples)
     ]
     fastq_outputs = expand(
@@ -139,7 +139,7 @@ def get_fastq_outputs():
 
 def get_fast5_outputs():
     fast5_outputs = [
-        f"{data_dir}/{project}/_transfer/fast5/{sample}_fast5_{{state}}.tar.gz"
+        f"{data_dir}/{project}/_transfer/fast5/{project}_{sample}_fast5_{{state}}.tar.gz"
         for project, sample in zip(projects, samples)
     ]
     fast5_outputs = expand(
@@ -164,7 +164,7 @@ def get_outputs(file_types):
 
 def get_final_checksum_outputs():
     final_checksum_outputs = expand(
-        "{data_dir}/{project}/_transfer/final_checksums/archives.sha1",
+        "{data_dir}/{project}/_transfer/final_checksums/{project}_archives.sha1",
         data_dir=data_dir,
         project=np.unique(projects),
     )
