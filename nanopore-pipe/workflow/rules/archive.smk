@@ -65,7 +65,7 @@ rule tar_fastqs:
         """
         cd {params.data_dir}/{wildcards.project} &&
             find {wildcards.sample}/*/fastq_{wildcards.state} -iname "*fastq.gz" |
-            xargs tar -cvf - > {output}
+            tar -cvf {output} --files-from -
         """
 
 
@@ -90,7 +90,7 @@ rule tar_fast5s:
         """
         cd {params.data_dir}/{wildcards.project} &&
             find {wildcards.sample}/*/fast5_{wildcards.state} -iname "*fast5" |
-            xargs tar -cvf - |
+            tar -cvf - --files-from - |
             pigz -p {threads} > {output}
         """
 
