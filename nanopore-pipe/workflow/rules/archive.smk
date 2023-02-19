@@ -100,7 +100,7 @@ rule calculate_archive_checksums:
         get_outputs(file_types),
     output:
         expand(
-            "{data_dir}/{{project}}/{transfer_dir}/final_checksums/{{project}}_archives.sha1",
+            "{data_dir}/{{project}}/{transfer_dir}/checksums/final/{{project}}_archives.sha1",
             data_dir=data_dir,
             transfer_dir=transfer_dir,
         ),
@@ -113,4 +113,29 @@ rule calculate_archive_checksums:
         """
         cd {params.data_dir}/{wildcards.project} &&
             find . -type f -iname "*tar*" | xargs shasum -a 1 > {output}
+        """
+
+
+rule validate_tars:
+    input:
+        get_outputs(file_types),
+    output:
+        expand(
+            "{data_dir}/{{project}}/{transfer_dir}/checksums/final/{{project}}_{{sample}}_{{file_type}}_list.txt",
+            data_dir=data_dir,
+            transfer_dir=transfer_dir,
+        ),
+    log:
+        "logs/{project}_{sample}_{file_type}_validate_tars.log",
+    threads: 1
+    params:
+        data_dir=data_dir,
+        transfer_dir=transfer_dir,
+    shell:
+        """
+        tars={wildcards.project}_{wildcards.sample}_{wildcards.file_type}*.tar*
+        cd {params.data_dir}/{wildcards.project}/{params.transfer_dir}/{wildcards.file_type} &&
+            for tar in $tars; do
+                tar -tvf $tar >> {output}
+            done
         """
