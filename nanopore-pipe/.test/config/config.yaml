@@ -38,7 +38,6 @@ extra_dirs:
 # do not process these directories
 ignore_dirs:
     - '20221208_wehi_bowden_runb'
-    - ''
 
 # set true if you only want to run the
 # script on *only* the extra_dirs set above

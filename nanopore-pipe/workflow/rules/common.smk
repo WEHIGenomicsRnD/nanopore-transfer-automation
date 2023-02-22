@@ -83,6 +83,20 @@ def is_run_complete(sample_dir):
     return any(run_complete)
 
 
+def is_transfer_complete(project_dir_full):
+    """
+    Checks whether run has already been transferred;
+    this is indicated by the presence of a file under
+    the transfer directory called transfer.success
+    """
+    transfer_dir_full = os.path.join(project_dir_full, transfer_dir)
+    if os.path.exists(transfer_dir_full):
+        files_in_transfer_dir = next(os.walk(transfer_dir_full))[2]
+        return "transfer.success" in files_in_transfer_dir
+    else:
+        return False
+
+
 # build list of projects and samples to archive
 project_dirs = []
 if ignore_proj_regex and extra_dirs:
@@ -96,6 +110,14 @@ project_dirs = filter(lambda project: project not in ignore_dirs, project_dirs)
 projects, samples = [], []
 for project in project_dirs:
     project_dir_full = os.path.join(data_dir, project)
+
+    if is_transfer_complete(project_dir_full):
+        print(
+            f"Transfer of project {project} already complete; skipping.",
+            file=sys.stdout,
+        )
+        continue
+
     samples_in_project = next(os.walk(project_dir_full))[1]
     samples_in_project = filter(
         lambda sample: sample != transfer_dir, samples_in_project
