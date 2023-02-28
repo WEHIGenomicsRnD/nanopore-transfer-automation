@@ -136,6 +136,10 @@ rule validate_tars:
         tars={wildcards.project}_{wildcards.sample}_{wildcards.file_type}*.tar*
         cd {params.data_dir}/{wildcards.project}/{params.transfer_dir}/{wildcards.file_type} &&
             for tar in $tars; do
-                tar -tvf $tar >> {output}
+                if [[ $tar == *.gz ]]; then
+                    tar -tvf <(pigz -dc $tar) >> {output}
+                else
+                    tar -tvf $tar >> {output}
+                fi
             done
         """
