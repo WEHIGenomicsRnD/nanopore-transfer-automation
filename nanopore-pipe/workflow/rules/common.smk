@@ -207,14 +207,25 @@ def get_final_checksum_outputs():
 
 def get_validate_tars_outputs():
     validate_tars_outputs = [
-        f"{data_dir}/{project}/{{transfer_dir}}/checksums/final/{project}_{sample}_{{file_type}}_list.txt"
+        f"{data_dir}/{project}/{transfer_dir}/{{file_type}}/{project}_{sample}_{{file_type}}_{{state}}_list.txt"
         for project, sample in zip(projects, samples)
     ]
 
     validate_tars_outputs = expand(
         validate_tars_outputs,
-        data_dir=data_dir,
-        transfer_dir=transfer_dir,
-        file_type=DATA_FILES,
+        file_type=[
+            file_type
+            for file_type in file_types
+            if file_type not in ["checksums", "reports"]
+        ],
+        state=STATES,
     )
     return validate_tars_outputs
+
+
+def get_validate_reports_outputs():
+    validate_reports_outputs = [
+        f"{data_dir}/{project}/{transfer_dir}/reports/{project}_{sample}_reports_list.txt"
+        for project, sample in zip(projects, samples)
+    ]
+    return validate_reports_outputs

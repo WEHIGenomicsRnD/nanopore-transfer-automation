@@ -118,28 +118,50 @@ rule calculate_archive_checksums:
 
 rule validate_tars:
     input:
-        get_outputs(file_types),
+        get_fast5_outputs(),
+        get_fastq_outputs(),
     output:
         expand(
-            "{data_dir}/{{project}}/{transfer_dir}/checksums/final/{{project}}_{{sample}}_{{file_type}}_list.txt",
+            "{data_dir}/{{project}}/{transfer_dir}/{{file_type}}/{{project}}_{{sample}}_{{file_type}}_{{state}}_list.txt",
             data_dir=data_dir,
             transfer_dir=transfer_dir,
         ),
     log:
-        "logs/{project}_{sample}_{file_type}_validate_tars.log",
+        "logs/{project}_{sample}_{file_type}_{state}_validate_tars.log",
     threads: 1
     params:
         data_dir=data_dir,
         transfer_dir=transfer_dir,
     shell:
         """
-        tars={wildcards.project}_{wildcards.sample}_{wildcards.file_type}*.tar*
+        tar={wildcards.project}_{wildcards.sample}_{wildcards.file_type}_{wildcards.state}.tar*
         cd {params.data_dir}/{wildcards.project}/{params.transfer_dir}/{wildcards.file_type} &&
-            for tar in $tars; do
-                if [[ $tar == *.gz ]]; then
-                    tar -tvf <(pigz -dc $tar) >> {output}
-                else
-                    tar -tvf $tar >> {output}
-                fi
-            done
+            if [[ $tar == *.gz ]]; then
+                tar -tvf <(pigz -dc $tar) >> {output}
+            else
+                tar -tvf $tar >> {output}
+            fi
+        """
+
+
+rule validate_reports:
+    input:
+        get_report_outputs(),
+    output:
+        expand(
+            "{data_dir}/{{project}}/{transfer_dir}/reports/{{project}}_{{sample}}_reports_list.txt",
+            data_dir=data_dir,
+            transfer_dir=transfer_dir,
+        ),
+    log:
+        "logs/{project}_{sample}_reports_validate_reports.log",
+    threads: 1
+    params:
+        data_dir=data_dir,
+        transfer_dir=transfer_dir,
+    shell:
+        """
+        tar={wildcards.project}_{wildcards.sample}_reports.tar.gz
+        cd {params.data_dir}/{wildcards.project}/{params.transfer_dir}/reports &&
+            tar -tvf <(pigz -dc $tar) >> {output}
         """
