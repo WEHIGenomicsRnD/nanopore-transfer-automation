@@ -165,3 +165,18 @@ rule validate_reports:
         cd {params.data_dir}/{wildcards.project}/{params.transfer_dir}/reports &&
             tar -tvf <(pigz -dc $tar) >> {output}
         """
+
+
+rule archive_complete:
+    input:
+        get_validate_reports_outputs(),
+        get_validate_tars_outputs(),
+    output:
+        f"{data_dir}/{{project}}/{transfer_dir}/archive.success",
+    log:
+        "logs/{project}_archive_complete.txt",
+    threads: 1
+    shell:
+        """
+        touch {output}
+        """

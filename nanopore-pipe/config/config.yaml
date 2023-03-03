@@ -1,5 +1,5 @@
 # directory containing runs (MUST be an absolute path)
-data_dir: '/Users/cmero.ma/Dropbox/bioinfo/projects/sequencing-automations/nanopore/test'
+data_dir: '/Users/cmero.ma/Dropbox/bioinfo/projects/sequencing-automations/nanopore-pipe/.test/test_data'
 
 # what to call directory for transfer
 transfer_dir: '_transfer'

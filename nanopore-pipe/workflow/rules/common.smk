@@ -83,16 +83,18 @@ def is_run_complete(sample_dir):
     return any(run_complete)
 
 
-def is_transfer_complete(project_dir_full):
+def is_archive_complete(project_dir_full):
     """
-    Checks whether run has already been transferred;
+    Checks whether run has already been archived;
     this is indicated by the presence of a file under
-    the transfer directory called transfer.success
+    the transfer directory called archive.success.
+    This is required because files from the _transfer
+    directory may have been deleted due to transfer.
     """
     transfer_dir_full = os.path.join(project_dir_full, transfer_dir)
     if os.path.exists(transfer_dir_full):
         files_in_transfer_dir = next(os.walk(transfer_dir_full))[2]
-        return "transfer.success" in files_in_transfer_dir
+        return "archive.success" in files_in_transfer_dir
     else:
         return False
 
@@ -111,9 +113,9 @@ projects, samples = [], []
 for project in project_dirs:
     project_dir_full = os.path.join(data_dir, project)
 
-    if is_transfer_complete(project_dir_full):
+    if is_archive_complete(project_dir_full):
         print(
-            f"Transfer of project {project} already complete; skipping.",
+            f"Archiving of project {project} already complete; skipping.",
             file=sys.stdout,
         )
         continue
@@ -229,3 +231,11 @@ def get_validate_reports_outputs():
         for project, sample in zip(projects, samples)
     ]
     return validate_reports_outputs
+
+
+def get_archive_complete_outputs():
+    archive_complete_outputs = [
+        f"{data_dir}/{project}/{transfer_dir}/archive.success"
+        for project in np.unique(projects)
+    ]
+    return archive_complete_outputs
