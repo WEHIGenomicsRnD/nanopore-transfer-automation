@@ -128,6 +128,8 @@ rule validate_tars:
         ),
     log:
         "logs/{project}_{sample}_{file_type}_{state}_validate_tars.log",
+    conda:
+        "../envs/archive.yaml"
     threads: 1
     params:
         data_dir=data_dir,
@@ -155,6 +157,8 @@ rule validate_reports:
         ),
     log:
         "logs/{project}_{sample}_reports_validate_reports.log",
+    conda:
+        "../envs/archive.yaml"
     threads: 1
     params:
         data_dir=data_dir,
