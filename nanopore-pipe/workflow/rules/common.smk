@@ -63,7 +63,6 @@ def get_project_dirs(data_dir, proj_dir_regex):
     for proj_dir in os.listdir(data_dir):
         is_project_dir = re.match(proj_dir_regex, proj_dir)
         if is_project_dir:
-            print(f"Found project directory {proj_dir}.", file=sys.stderr)
             project_dirs.append(proj_dir)
     return project_dirs
 
@@ -107,11 +106,20 @@ else:
     project_dirs = get_project_dirs(data_dir, proj_dir_regex)
     project_dirs = project_dirs + extra_dirs if extra_dirs else project_dirs
 
-project_dirs = filter(lambda project: project not in ignore_dirs, project_dirs)
+project_dirs = list(filter(lambda project: project not in ignore_dirs, project_dirs))
+for proj_dir in project_dirs:
+    print(f"Found project directory {proj_dir}.", file=sys.stderr)
+projects_with_incomplete_runs = []
 
 projects, samples = [], []
 for project in project_dirs:
     project_dir_full = os.path.join(data_dir, project)
+    if not os.path.exists(project_dir_full):
+        print(
+            f"Project directory {project} does not exist; skipping.",
+            file=sys.stderr,
+        )
+        continue
 
     if is_archive_complete(project_dir_full):
         print(
@@ -129,8 +137,17 @@ for project in project_dirs:
     for sample in samples_in_project:
         sample_dir = os.path.join(project_dir_full, sample)
         if not check_if_complete or is_run_complete(sample_dir):
+            print(
+                f"Found {sample} in project {project} for processing.", file=sys.stderr
+            )
             projects.append(project)
             samples.append(sample)
+        elif check_if_complete and not is_run_complete(sample_dir):
+            print(
+                f"Skipping {sample} in project {project} (run incomplete).",
+                file=sys.stderr,
+            )
+            projects_with_incomplete_runs.append(project)
 
 
 # input/output functions
@@ -237,5 +254,6 @@ def get_archive_complete_outputs():
     archive_complete_outputs = [
         f"{data_dir}/{project}/{transfer_dir}/archive.success"
         for project in np.unique(projects)
+        if project not in projects_with_incomplete_runs
     ]
     return archive_complete_outputs
