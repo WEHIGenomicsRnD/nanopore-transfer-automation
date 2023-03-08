@@ -176,11 +176,26 @@ rule archive_complete:
         get_validate_reports_outputs(),
         get_validate_tars_outputs(),
     output:
-        f"{data_dir}/{{project}}/{transfer_dir}/archive.success",
+        tar_file_counts=f"{data_dir}/{{project}}/{transfer_dir}/tar_file_counts.txt",
+        sys_file_counts=f"{data_dir}/{{project}}/{transfer_dir}/system_file_counts.txt",
     log:
         "logs/{project}_archive_complete.txt",
     threads: 1
+    params:
+        data_dir=data_dir,
+        transfer_dir=transfer_dir,
     shell:
         """
-        touch {output}
+        cd {params.data_dir}/{wildcards.project}/{params.transfer_dir} &&
+            wc -l */*fast*list.txt > {output.tar_file_counts}
+
+        samples=`ls {params.data_dir}/{wildcards.project}/ | grep -v _transfer`
+        for type in fast5 fastq; do
+            for sample in $samples; do
+                for state in fail pass; do
+                    count=`find {params.data_dir}/{wildcards.project}/$sample/*/${{type}}_$state -type f | wc -l`
+                    echo "$count $sample $type $state" >> {output.sys_file_counts}
+                done
+            done
+        done
         """

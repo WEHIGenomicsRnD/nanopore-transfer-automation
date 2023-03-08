@@ -86,14 +86,18 @@ def is_archive_complete(project_dir_full):
     """
     Checks whether run has already been archived;
     this is indicated by the presence of a file under
-    the transfer directory called archive.success.
+    the transfer directory called tar_file_counts
+    (or archive.success for backwards compatibility).
     This is required because files from the _transfer
     directory may have been deleted due to transfer.
     """
     transfer_dir_full = os.path.join(project_dir_full, transfer_dir)
     if os.path.exists(transfer_dir_full):
         files_in_transfer_dir = next(os.walk(transfer_dir_full))[2]
-        return "archive.success" in files_in_transfer_dir
+        return (
+            "archive.success" in files_in_transfer_dir
+            or "tar_file_counts.txt" in files_in_transfer_dir
+        )
     else:
         return False
 
@@ -252,7 +256,7 @@ def get_validate_reports_outputs():
 
 def get_archive_complete_outputs():
     archive_complete_outputs = [
-        f"{data_dir}/{project}/{transfer_dir}/archive.success"
+        f"{data_dir}/{project}/{transfer_dir}/tar_file_counts.txt"
         for project in np.unique(projects)
         if project not in projects_with_incomplete_runs
     ]
