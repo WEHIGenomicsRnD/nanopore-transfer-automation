@@ -192,10 +192,12 @@ rule archive_complete:
         samples=`ls {params.data_dir}/{wildcards.project}/ | grep -v _transfer`
         for type in fast5 fastq; do
             for sample in $samples; do
-                for state in fail pass; do
-                    count=`find {params.data_dir}/{wildcards.project}/$sample/*/${{type}}_$state -type f | wc -l`
-                    echo "$count $sample $type $state" >> {output.sys_file_counts}
-                done
+                if [[ -d {params.data_dir}/{wildcards.project}/$sample ]]; then
+                    for state in fail pass; do
+                        count=`find {params.data_dir}/{wildcards.project}/$sample/*/${{type}}_$state -type f | wc -l`
+                        echo "$count $sample $type $state" >> {output.sys_file_counts}
+                    done
+                fi
             done
         done
         """
