@@ -45,3 +45,15 @@ ignore_proj_regex: False
 
 # number of threads to use
 threads: 12
+
+# whether to transfer data upon archiving completion using Globus
+transfer: False 
+
+# this machine's Globus endpoint ID
+src_endpoint: ''
+
+# Globus endpoint ID to transfer data to
+dest_endpoint: ''
+
+# Globus path to transfer data to
+dest_path: ''

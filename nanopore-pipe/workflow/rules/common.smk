@@ -17,6 +17,7 @@ proj_dir_regex = re.compile(r"%s" % config["proj_dir_regex"])
 end_of_run_file_regex = re.compile(r"%s" % config["end_of_run_file_regex"])
 ignore_proj_regex = str(config["ignore_proj_regex"]).lower() == "true"
 check_if_complete = str(config["check_if_complete"]).lower() == "true"
+transfer = str(config["transfer"]).lower() == "true"
 
 # error check input
 if not os.path.exists(data_dir):
@@ -82,7 +83,7 @@ def is_run_complete(sample_dir):
     return any(run_complete)
 
 
-def is_archive_complete(project_dir_full):
+def is_processing_complete(project_dir_full):
     """
     Checks whether run has already been archived;
     this is indicated by the presence of a file under
@@ -94,9 +95,10 @@ def is_archive_complete(project_dir_full):
     transfer_dir_full = os.path.join(project_dir_full, transfer_dir)
     if os.path.exists(transfer_dir_full):
         files_in_transfer_dir = next(os.walk(transfer_dir_full))[2]
+        final_file = "transfer.txt" if transfer else "tar_file_counts.txt"
         return (
             "archive.success" in files_in_transfer_dir
-            or "tar_file_counts.txt" in files_in_transfer_dir
+            or final_file in files_in_transfer_dir
         )
     else:
         return False
@@ -115,6 +117,7 @@ for proj_dir in project_dirs:
     print(f"Found project directory {proj_dir}.", file=sys.stderr)
 projects_with_incomplete_runs = []
 
+
 projects, samples = [], []
 for project in project_dirs:
     project_dir_full = os.path.join(data_dir, project)
@@ -125,9 +128,9 @@ for project in project_dirs:
         )
         continue
 
-    if is_archive_complete(project_dir_full):
+    if is_processing_complete(project_dir_full):
         print(
-            f"Archiving of project {project} already complete; skipping.",
+            f"Processing of project {project} already complete; skipping.",
             file=sys.stdout,
         )
         continue
@@ -261,3 +264,15 @@ def get_archive_complete_outputs():
         if project not in projects_with_incomplete_runs
     ]
     return archive_complete_outputs
+
+
+def get_transfer_outputs():
+    if transfer:
+        transfer_outputs = [
+            f"{data_dir}/{project}/{transfer_dir}/transfer.txt"
+            for project in np.unique(projects)
+            if project not in projects_with_incomplete_runs
+        ]
+        return transfer_outputs
+    else:
+        return []
