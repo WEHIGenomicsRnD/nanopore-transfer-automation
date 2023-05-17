@@ -1,0 +1,4 @@
+channels:
+  - conda-forge
+dependencies:
+  - globus-cli =3.13.0
