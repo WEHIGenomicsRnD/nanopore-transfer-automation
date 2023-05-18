@@ -7,8 +7,6 @@ rule transfer:
         f"{data_dir}/{{project}}/{transfer_dir}/transfer.txt",
     log:
         "logs/{project}_transfer.log",
-    conda:
-        "../envs/globus.yaml"
     threads: 1
     params:
         data_dir=data_dir,
@@ -20,10 +18,10 @@ rule transfer:
         """
         globus transfer \
             {params.src_endpoint}:{params.data_dir}/{wildcards.project}/{params.transfer_dir} \
-            {params.dest_endpoint}:{params.dest_path}/{project} \
+            {params.dest_endpoint}:{params.dest_path}/{wildcards.project} \
             --recursive \
             --sync-level checksum \
             --verify-checksum \
+            --fail-on-quota-errors \
             --notify on > {output}
         """
-
