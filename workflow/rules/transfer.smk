@@ -7,6 +7,8 @@ rule transfer:
         f"{data_dir}/{{project}}/{transfer_dir}/transfer.txt",
     log:
         "logs/{project}_transfer.log",
+    conda:
+        "../envs/globus.yaml"
     threads: 1
     params:
         data_dir=data_dir,
