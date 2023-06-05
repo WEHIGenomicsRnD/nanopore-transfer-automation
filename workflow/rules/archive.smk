@@ -188,8 +188,9 @@ rule archive_complete:
         raw_format=raw_format,
     shell:
         """
-        cd {params.data_dir}/{wildcards.project}/{params.transfer_dir} &&
-            wc -l */*fast*list.txt > {output.tar_file_counts}
+        cd {params.data_dir}/{wildcards.project}/{params.transfer_dir}
+        wc -l */*_{params.raw_format}_*_list.txt > {output.tar_file_counts}
+        wc -l */*_fastq_*_list.txt >> {output.tar_file_counts}
 
         samples=`ls {params.data_dir}/{wildcards.project}/ | grep -v _transfer`
         for type in {params.raw_format} fastq; do
