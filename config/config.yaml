@@ -6,12 +6,14 @@ transfer_dir: '_transfer'
 
 # file types to process in a list
 # each item must match one of
-# 'fastq', 'fast5', 'reports'
-# or checksums
+# 'fastq', 'fast5', 'pod5',
+# 'reports' and 'checksums'
+# NOTE: you must specify only ONE
+# of fast5 or pod5 per run
 file_types:
     - 'reports'
     - 'fastq'
-    - 'fast5'
+    - 'pod5'
     - 'checksums'
 
 # project directory regex (do not change

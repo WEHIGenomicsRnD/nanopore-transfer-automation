@@ -69,27 +69,29 @@ rule tar_fastqs:
         """
 
 
-rule tar_fast5s:
+rule tar_raw_data:
     input:
         [f"{data_dir}/{project}/{sample}" for project, sample in zip(projects, samples)],
     output:
         expand(
-            "{data_dir}/{{project}}/{transfer_dir}/fast5/{{project}}_{{sample}}_fast5_{{state}}.tar.gz",
+            "{data_dir}/{{project}}/{transfer_dir}/{raw_format}/{{project}}_{{sample}}_{raw_format}_{{state}}.tar.gz",
             data_dir=data_dir,
             transfer_dir=transfer_dir,
+            raw_format=raw_format,
             state=STATES,
         ),
     log:
-        "logs/{project}_{sample}_{state}_fast5.log",
+        "logs/{project}_{sample}_{state}_raw_data.log",
     conda:
         "../envs/archive.yaml"
     threads: config["threads"]
     params:
         data_dir=data_dir,
+        raw_format=raw_format,
     shell:
         """
         cd {params.data_dir}/{wildcards.project} &&
-            find {wildcards.sample}/*/fast5_{wildcards.state} -iname "*fast5" |
+            find {wildcards.sample}/*/{raw_format}_{wildcards.state} -iname "*{params.raw_format}" |
             tar -cvf - --files-from - |
             pigz -p {threads} > {output}
         """
@@ -118,8 +120,7 @@ rule calculate_archive_checksums:
 
 rule validate_tars:
     input:
-        get_fast5_outputs(),
-        get_fastq_outputs(),
+        get_outputs(file_types),
     output:
         expand(
             "{data_dir}/{{project}}/{transfer_dir}/{{file_type}}/{{project}}_{{sample}}_{{file_type}}_{{state}}_list.txt",
@@ -184,13 +185,14 @@ rule archive_complete:
     params:
         data_dir=data_dir,
         transfer_dir=transfer_dir,
+        raw_format=raw_format,
     shell:
         """
         cd {params.data_dir}/{wildcards.project}/{params.transfer_dir} &&
             wc -l */*fast*list.txt > {output.tar_file_counts}
 
         samples=`ls {params.data_dir}/{wildcards.project}/ | grep -v _transfer`
-        for type in fast5 fastq; do
+        for type in {params.raw_format} fastq; do
             for sample in $samples; do
                 if [[ -d {params.data_dir}/{wildcards.project}/$sample ]]; then
                     for state in fail pass; do

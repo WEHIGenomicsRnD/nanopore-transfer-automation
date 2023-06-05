@@ -4,7 +4,7 @@ import os
 import re
 
 # variables
-DATA_FILES = ["reports", "fastq", "fast5"]
+DATA_FILES = ["reports", "fastq", "fast5", "pod5"]
 POSSIBLE_FILE_TYPES = DATA_FILES + ["checksums"]
 STATES = ["pass", "fail"]
 
@@ -18,6 +18,13 @@ end_of_run_file_regex = re.compile(r"%s" % config["end_of_run_file_regex"])
 ignore_proj_regex = str(config["ignore_proj_regex"]).lower() == "true"
 check_if_complete = str(config["check_if_complete"]).lower() == "true"
 transfer = str(config["transfer"]).lower() == "true"
+
+if "pod5" in file_types:
+    raw_format = "pod5"
+elif "fast5" in file_types:
+    raw_format = "fast5"
+else:
+    raw_format = ""
 
 # error check input
 if not os.path.exists(data_dir):
@@ -195,17 +202,17 @@ def get_fastq_outputs():
     return fastq_outputs
 
 
-def get_fast5_outputs():
-    fast5_outputs = [
-        f"{data_dir}/{project}/{{transfer_dir}}/fast5/{project}_{sample}_fast5_{{state}}.tar.gz"
+def get_raw_outputs():
+    raw_outputs = [
+        f"{data_dir}/{project}/{{transfer_dir}}/{raw_format}/{project}_{sample}_{raw_format}_{{state}}.tar.gz"
         for project, sample in zip(projects, samples)
     ]
-    fast5_outputs = expand(
-        fast5_outputs,
+    raw_outputs = expand(
+        raw_outputs,
         transfer_dir=transfer_dir,
         state=STATES,
     )
-    return fast5_outputs
+    return raw_outputs
 
 
 def get_outputs(file_types):
@@ -216,8 +223,8 @@ def get_outputs(file_types):
         outputs.extend(get_report_outputs())
     if "fastq" in file_types:
         outputs.extend(get_fastq_outputs())
-    if "fast5" in file_types:
-        outputs.extend(get_fast5_outputs())
+    if "fast5" in file_types or "pod5" in file_types:
+        outputs.extend(get_raw_outputs())
     return outputs
 
 

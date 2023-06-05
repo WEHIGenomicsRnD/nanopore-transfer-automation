@@ -1,17 +1,19 @@
 # directory containing runs (MUST be an absolute path)
-data_dir: '/github/workspace/nanopore-pipe/.test/test_data'
+data_dir: '/github/workspace/.test/test_data'
 
 # what to call directory for transfer
 transfer_dir: '_transfer'
 
 # file types to process in a list
 # each item must match one of
-# 'fastq', 'fast5', 'reports'
-# or checksums
+# 'fastq', 'fast5', 'pod5', 
+# 'reports' and 'checksums'
+# NOTE: you must specify only ONE
+# of fast5 or pod5 per run
 file_types:
     - 'reports'
     - 'fastq'
-    - 'fast5'
+    - 'pod5'
     - 'checksums'
 
 # project directory regex (do not change
