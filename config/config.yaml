@@ -16,8 +16,8 @@ file_types:
     - 'pod5'
     - 'checksums'
 
-# project directory regex (do not change
-# unless you know what you are doing)
+# project directory regex (set this based on
+# your lab's naming convention)
 proj_dir_regex: '^(\d{6,8})_([a-zA-Z0-9\-]+)_([a-zA-Z0-9\-]+)_([a-zA-Z0-9\-_]+)$'
 
 # regex of run file that signifies that
