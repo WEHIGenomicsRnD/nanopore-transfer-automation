@@ -103,9 +103,21 @@ def is_processing_complete(project_dir_full):
     if os.path.exists(transfer_dir_full):
         files_in_transfer_dir = next(os.walk(transfer_dir_full))[2]
         final_file = "transfer.txt" if transfer else "tar_file_counts.txt"
+
+        project_name = os.path.basename(project_dir_full)
+        final_file_with_projname = (
+            f"{project_name}_transfer.txt"
+            if transfer
+            else f"{project_name}_tar_file_counts.txt"
+        )
+
+        log_dir = os.path.join(transfer_dir_full, "logs")
+        files_in_log_dir = next(os.walk(log_dir))[2] if os.path.exists(log_dir) else []
+
         return (
             "archive.success" in files_in_transfer_dir
             or final_file in files_in_transfer_dir
+            or final_file_with_projname in files_in_log_dir
         )
     else:
         return False
@@ -266,7 +278,7 @@ def get_validate_reports_outputs():
 
 def get_archive_complete_outputs():
     archive_complete_outputs = [
-        f"{data_dir}/{project}/{transfer_dir}/tar_file_counts.txt"
+        f"{data_dir}/{project}/{transfer_dir}/logs/{project}_tar_file_counts.txt"
         for project in np.unique(projects)
         if project not in projects_with_incomplete_runs
     ]
@@ -276,7 +288,7 @@ def get_archive_complete_outputs():
 def get_transfer_outputs():
     if transfer:
         transfer_outputs = [
-            f"{data_dir}/{project}/{transfer_dir}/transfer.txt"
+            f"{data_dir}/{project}/{transfer_dir}/logs/{project}_transfer.txt"
             for project in np.unique(projects)
             if project not in projects_with_incomplete_runs
         ]

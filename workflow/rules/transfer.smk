@@ -2,9 +2,9 @@
 # will be successful. Check the Globus dashboard for the status of the transfer.
 rule transfer:
     input:
-        f"{data_dir}/{{project}}/{transfer_dir}/system_file_counts.txt",
+        f"{data_dir}/{{project}}/{transfer_dir}/logs/{{project}}_system_file_counts.txt",
     output:
-        f"{data_dir}/{{project}}/{transfer_dir}/transfer.txt",
+        f"{data_dir}/{{project}}/{transfer_dir}/logs/{{project}}_transfer.txt",
     log:
         "logs/{project}_transfer.log",
     conda:

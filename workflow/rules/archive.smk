@@ -177,8 +177,8 @@ rule archive_complete:
         get_validate_reports_outputs(),
         get_validate_tars_outputs(),
     output:
-        tar_file_counts=f"{data_dir}/{{project}}/{transfer_dir}/tar_file_counts.txt",
-        sys_file_counts=f"{data_dir}/{{project}}/{transfer_dir}/system_file_counts.txt",
+        tar_file_counts=f"{data_dir}/{{project}}/{transfer_dir}/logs/{{project}}_tar_file_counts.txt",
+        sys_file_counts=f"{data_dir}/{{project}}/{transfer_dir}/logs/{{project}}_system_file_counts.txt",
     log:
         "logs/{project}_archive_complete.txt",
     threads: 1
