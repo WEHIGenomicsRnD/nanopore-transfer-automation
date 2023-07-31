@@ -132,6 +132,9 @@ else:
     project_dirs = project_dirs + extra_dirs if extra_dirs else project_dirs
 
 project_dirs = list(filter(lambda project: project not in ignore_dirs, project_dirs))
+project_dirs = list(
+    filter(lambda project: project is not None and project != "", project_dirs)
+)
 for proj_dir in project_dirs:
     print(f"Found project directory {proj_dir}.", file=sys.stderr)
 projects_with_incomplete_runs = []
