@@ -44,6 +44,7 @@ for project, sample in zip(projects, samples):
     for file_type in file_types:
         for state in STATES:
             ext = "tar" if file_type == "fastq" else "tar.gz"
+            threads = 1 if file_type == "fastq" else config["threads"]
             rule:
                 name:
                     f"tar_{project}_{sample}_{file_type}_{state}"
@@ -56,7 +57,7 @@ for project, sample in zip(projects, samples):
                     f"logs/{project}_{sample}_{file_type}_{state}_tar.log",
                 conda:
                     "../envs/archive.yaml"
-                threads: 1
+                threads: threads
                 params:
                     data_dir=data_dir,
                     project=project,
