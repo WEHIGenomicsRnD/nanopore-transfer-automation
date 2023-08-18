@@ -13,6 +13,7 @@ transfer_dir: '_transfer'
 file_types:
     - 'reports'
     - 'fastq'
+    - 'fast5'
     - 'pod5'
     - 'checksums'
 
