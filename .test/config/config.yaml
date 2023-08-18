@@ -14,6 +14,7 @@ file_types:
     - 'reports'
     - 'fastq'
     - 'pod5'
+    - 'fast5'
     - 'checksums'
 
 # project directory regex (set this based on

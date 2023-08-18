@@ -26,7 +26,5 @@ rule all:
     input:
         get_outputs(file_types),
         get_final_checksum_outputs(),
-        get_validate_tars_outputs(),
-        get_validate_reports_outputs(),
         get_archive_complete_outputs(),
         get_transfer_outputs(),

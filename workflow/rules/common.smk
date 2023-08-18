@@ -2,11 +2,12 @@ import pandas as pd
 import numpy as np
 import os
 import re
+from glob import iglob
 
 # variables
 DATA_FILES = ["reports", "fastq", "fast5", "pod5"]
 POSSIBLE_FILE_TYPES = DATA_FILES + ["checksums"]
-STATES = ["pass", "fail"]
+STATES = ["pass", "fail", "skip"]
 
 data_dir = config["data_dir"]
 transfer_dir = config["transfer_dir"]
@@ -108,6 +109,11 @@ def is_processing_complete(project_dir_full):
         final_file_with_projname = (
             f"{project_name}_transfer.txt"
             if transfer
+            else f"{project_name}_file_counts.txt"
+        )
+        final_file_legacy = (
+            f"{project_name}_transfer.txt"
+            if transfer
             else f"{project_name}_tar_file_counts.txt"
         )
 
@@ -118,6 +124,7 @@ def is_processing_complete(project_dir_full):
             "archive.success" in files_in_transfer_dir
             or final_file in files_in_transfer_dir
             or final_file_with_projname in files_in_log_dir
+            or final_file_legacy in files_in_log_dir
         )
     else:
         return False
@@ -180,54 +187,33 @@ for project in project_dirs:
 
 
 # input/output functions
-def get_report_outputs():
-    report_outputs = [
-        f"{data_dir}/{project}/{{transfer_dir}}/reports/{project}_{sample}_reports.tar.gz"
-        for project, sample in zip(projects, samples)
-    ]
-    report_outputs = expand(
-        report_outputs,
-        transfer_dir=transfer_dir,
-    )
-    return report_outputs
-
-
 def get_checksum_outputs():
     checksum_outputs = [
-        f"{data_dir}/{project}/{{transfer_dir}}/checksums/{project}_{sample}.sha1"
+        f"{data_dir}/{project}/{transfer_dir}/checksums/{project}_{sample}_checksums.sha1"
         for project, sample in zip(projects, samples)
     ]
-    checksum_outputs = expand(
-        checksum_outputs,
-        transfer_dir=transfer_dir,
-    )
     return checksum_outputs
 
+def get_report_outputs():
+    report_outputs = []
+    for project, sample in zip(projects, samples):
+        report_outputs.append(f"{data_dir}/{project}/{transfer_dir}/reports/{project}_{sample}_reports.tar.gz")
+        report_outputs.append(f"{data_dir}/{project}/{transfer_dir}/reports/{project}_{sample}_reports_list.txt")
+    return report_outputs
 
-def get_fastq_outputs():
-    fastq_outputs = [
-        f"{data_dir}/{project}/{{transfer_dir}}/fastq/{project}_{sample}_fastq_{{state}}.tar"
-        for project, sample in zip(projects, samples)
-    ]
-    fastq_outputs = expand(
-        fastq_outputs,
-        transfer_dir=transfer_dir,
-        state=STATES,
-    )
-    return fastq_outputs
+def get_output_by_type(filetype):
+    file_extension = "tar" if filetype == "fastq" else "tar.gz"
 
+    outputs = []
+    for project, sample in zip(projects, samples):
+        files_under_sample = [os.path.basename(f) for f in iglob(f"{data_dir}/{project}/{sample}/*/*")]
+        out_prefix = f"{data_dir}/{project}/{transfer_dir}/{filetype}/{project}_{sample}_{filetype}"
+        for state in STATES:
+            if f"{filetype}_{state}" in files_under_sample:
+                outputs.append(f"{out_prefix}_{state}.{file_extension}")
+                outputs.append(f"{out_prefix}_{state}_list.txt")
 
-def get_raw_outputs():
-    raw_outputs = [
-        f"{data_dir}/{project}/{{transfer_dir}}/{raw_format}/{project}_{sample}_{raw_format}_{{state}}.tar.gz"
-        for project, sample in zip(projects, samples)
-    ]
-    raw_outputs = expand(
-        raw_outputs,
-        transfer_dir=transfer_dir,
-        state=STATES,
-    )
-    return raw_outputs
+    return outputs
 
 
 def get_outputs(file_types):
@@ -237,38 +223,22 @@ def get_outputs(file_types):
     if "reports" in file_types:
         outputs.extend(get_report_outputs())
     if "fastq" in file_types:
-        outputs.extend(get_fastq_outputs())
-    if "fast5" in file_types or "pod5" in file_types:
-        outputs.extend(get_raw_outputs())
+        outputs.extend(get_output_by_type("fastq"))
+    if "fast5" in file_types:
+        outputs.extend(get_output_by_type("fast5"))
+    if "pod5" in file_types:
+        outputs.extend(get_output_by_type("pod5"))
     return outputs
 
 
 def get_final_checksum_outputs():
     final_checksum_outputs = expand(
-        "{data_dir}/{project}/{transfer_dir}/checksums/final/{project}_archives.sha1",
+        "{data_dir}/{project}/{transfer_dir}/checksums/{project}_archives.sha1",
         data_dir=data_dir,
         project=np.unique(projects),
         transfer_dir=transfer_dir,
     )
     return final_checksum_outputs
-
-
-def get_validate_tars_outputs():
-    validate_tars_outputs = [
-        f"{data_dir}/{project}/{transfer_dir}/{{file_type}}/{project}_{sample}_{{file_type}}_{{state}}_list.txt"
-        for project, sample in zip(projects, samples)
-    ]
-
-    validate_tars_outputs = expand(
-        validate_tars_outputs,
-        file_type=[
-            file_type
-            for file_type in file_types
-            if file_type not in ["checksums", "reports"]
-        ],
-        state=STATES,
-    )
-    return validate_tars_outputs
 
 
 def get_validate_reports_outputs():
@@ -281,7 +251,7 @@ def get_validate_reports_outputs():
 
 def get_archive_complete_outputs():
     archive_complete_outputs = [
-        f"{data_dir}/{project}/{transfer_dir}/logs/{project}_tar_file_counts.txt"
+        f"{data_dir}/{project}/{transfer_dir}/logs/{project}_file_counts.txt"
         for project in np.unique(projects)
         if project not in projects_with_incomplete_runs
     ]
