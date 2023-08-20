@@ -20,6 +20,7 @@ rule calculate_checksums:
             find {wildcards.sample}/* -type f | xargs shasum -a 1 > {output}
         """
 
+
 rule calculate_archive_checksums:
     input:
         get_outputs(file_types),
@@ -40,11 +41,13 @@ rule calculate_archive_checksums:
             find . -type f -iname "*tar*" | xargs shasum -a 1 > {output}
         """
 
+
 for project, sample in zip(projects, samples):
     for file_type in file_types:
         for state in STATES:
             ext = "tar" if file_type == "fastq" else "tar.gz"
             threads = 1 if file_type == "fastq" else config["threads"]
+
             rule:
                 name:
                     f"tar_{project}_{sample}_{file_type}_{state}"
@@ -80,6 +83,7 @@ for project, sample in zip(projects, samples):
                     fi
                     """
 
+
 rule tar_reports:
     input:
         [f"{data_dir}/{project}/{sample}" for project, sample in zip(projects, samples)],
@@ -111,7 +115,7 @@ rule tar_reports:
 
 rule archive_complete:
     input:
-        get_outputs(file_types)
+        get_outputs(file_types),
     output:
         f"{data_dir}/{{project}}/{transfer_dir}/logs/{{project}}_file_counts.txt",
     log:
@@ -119,7 +123,7 @@ rule archive_complete:
     threads: 1
     params:
         data_dir=data_dir,
-        transfer_dir=transfer_dir
+        transfer_dir=transfer_dir,
     shell:
         """
         transfer_path={params.data_dir}/{wildcards.project}/{params.transfer_dir}

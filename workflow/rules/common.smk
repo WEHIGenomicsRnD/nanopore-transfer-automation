@@ -194,19 +194,27 @@ def get_checksum_outputs():
     ]
     return checksum_outputs
 
+
 def get_report_outputs():
     report_outputs = []
     for project, sample in zip(projects, samples):
-        report_outputs.append(f"{data_dir}/{project}/{transfer_dir}/reports/{project}_{sample}_reports.tar.gz")
-        report_outputs.append(f"{data_dir}/{project}/{transfer_dir}/reports/{project}_{sample}_reports_list.txt")
+        report_outputs.append(
+            f"{data_dir}/{project}/{transfer_dir}/reports/{project}_{sample}_reports.tar.gz"
+        )
+        report_outputs.append(
+            f"{data_dir}/{project}/{transfer_dir}/reports/{project}_{sample}_reports_list.txt"
+        )
     return report_outputs
+
 
 def get_output_by_type(filetype):
     file_extension = "tar" if filetype == "fastq" else "tar.gz"
 
     outputs = []
     for project, sample in zip(projects, samples):
-        files_under_sample = [os.path.basename(f) for f in iglob(f"{data_dir}/{project}/{sample}/*/*")]
+        files_under_sample = [
+            os.path.basename(f) for f in iglob(f"{data_dir}/{project}/{sample}/*/*")
+        ]
         out_prefix = f"{data_dir}/{project}/{transfer_dir}/{filetype}/{project}_{sample}_{filetype}"
         for state in STATES:
             if f"{filetype}_{state}" in files_under_sample:
