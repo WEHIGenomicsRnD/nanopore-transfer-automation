@@ -94,6 +94,7 @@ def is_processing_complete(project_dir_full):
     directory may have been deleted due to transfer.
     """
     transfer_dir_full = os.path.join(project_dir_full, transfer_dir)
+    transfer_complete_dir = f"{transfer_dir_full}_complete"
     if os.path.exists(transfer_dir_full):
         files_in_transfer_dir = next(os.walk(transfer_dir_full))[2]
         final_file = "transfer.txt" if transfer else "tar_file_counts.txt"
@@ -119,8 +120,9 @@ def is_processing_complete(project_dir_full):
             or final_file_with_projname in files_in_log_dir
             or final_file_legacy in files_in_log_dir
         )
-    else:
-        return False
+
+    # if transfer directory does not exist, check for _complete directory
+    return os.path.exists(transfer_complete_dir)
 
 
 # build list of projects and samples to archive
