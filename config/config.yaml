@@ -52,6 +52,13 @@ threads: 12
 # whether to transfer data upon archiving completion using Globus
 transfer: False
 
+# whether to delete data from source endpoint after transfer
+delete_on_transfer: False
+
+# Globus Flow ID to use for transfer
+# only used if delete_on_transfer flag is true
+globus_flow_id: ''
+
 # this machine's Globus endpoint ID
 src_endpoint: ''
 
