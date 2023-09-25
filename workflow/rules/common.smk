@@ -5,7 +5,7 @@ import re
 from glob import iglob
 
 # variables
-DATA_FILES = ["reports", "fastq", "fast5", "pod5"]
+DATA_FILES = ["reports", "fastq", "fast5", "pod5", "bam"]
 POSSIBLE_FILE_TYPES = DATA_FILES + ["checksums"]
 STATES = ["pass", "fail", "skip"]
 
@@ -19,13 +19,6 @@ end_of_run_file_regex = re.compile(r"%s" % config["end_of_run_file_regex"])
 ignore_proj_regex = str(config["ignore_proj_regex"]).lower() == "true"
 check_if_complete = str(config["check_if_complete"]).lower() == "true"
 transfer = str(config["transfer"]).lower() == "true"
-
-if "pod5" in file_types:
-    raw_format = "pod5"
-elif "fast5" in file_types:
-    raw_format = "fast5"
-else:
-    raw_format = ""
 
 # error check input
 if not os.path.exists(data_dir):
@@ -101,6 +94,7 @@ def is_processing_complete(project_dir_full):
     directory may have been deleted due to transfer.
     """
     transfer_dir_full = os.path.join(project_dir_full, transfer_dir)
+    transfer_complete_dir = f"{transfer_dir_full}_complete"
     if os.path.exists(transfer_dir_full):
         files_in_transfer_dir = next(os.walk(transfer_dir_full))[2]
         final_file = "transfer.txt" if transfer else "tar_file_counts.txt"
@@ -126,8 +120,9 @@ def is_processing_complete(project_dir_full):
             or final_file_with_projname in files_in_log_dir
             or final_file_legacy in files_in_log_dir
         )
-    else:
-        return False
+
+    # if transfer directory does not exist, check for _complete directory
+    return os.path.exists(transfer_complete_dir)
 
 
 # build list of projects and samples to archive
@@ -208,7 +203,7 @@ def get_report_outputs():
 
 
 def get_output_by_type(filetype):
-    file_extension = "tar" if filetype == "fastq" else "tar.gz"
+    file_extension = "tar" if filetype in ["fastq", "bam"] else "tar.gz"
 
     outputs = []
     for project, sample in zip(projects, samples):
@@ -236,6 +231,8 @@ def get_outputs(file_types):
         outputs.extend(get_output_by_type("fast5"))
     if "pod5" in file_types:
         outputs.extend(get_output_by_type("pod5"))
+    if "bam" in file_types:
+        outputs.extend(get_output_by_type("bam"))
     return outputs
 
 

@@ -45,8 +45,8 @@ rule calculate_archive_checksums:
 for project, sample in zip(projects, samples):
     for file_type in file_types:
         for state in STATES:
-            ext = "tar" if file_type == "fastq" else "tar.gz"
-            threads = 1 if file_type == "fastq" else config["threads"]
+            ext = "tar" if file_type in ["fastq", "bam"] else "tar.gz"
+            threads = 1 if file_type in ["fastq", "bam"] else config["threads"]
 
             rule:
                 name:
@@ -69,14 +69,14 @@ for project, sample in zip(projects, samples):
                     state=state,
                 shell:
                     """
-                    if [[ "{params.file_type}" == "fastq" ]]; then
+                    if [[ "{params.file_type}" == "fastq" || "{params.file_type}" == "bam" ]]; then
                         cd {params.data_dir}/{params.project} &&
-                            find {params.sample}/*/{params.file_type}_{params.state} -iname "*fastq.gz" |
+                            find {params.sample}/*/{params.file_type}_{params.state} -iname "*.{params.file_type}*" |
                             tar -cvf {output.tar} --files-from - ;
                         tar -tvf {output.tar} >> {output.txt}
                     else
                         cd {params.data_dir}/{params.project} &&
-                            find {params.sample}/*/{params.file_type}_{params.state} -iname "*{params.file_type}" |
+                            find {params.sample}/*/{params.file_type}_{params.state} -iname "*.{params.file_type}" |
                             tar -cvf - --files-from - |
                             pigz -p {threads} > {output.tar} ;
                         tar -tvf <(pigz -dc {output.tar}) >> {output.txt}

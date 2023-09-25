@@ -20,7 +20,7 @@ rule transfer:
         """
         globus transfer \
             {params.src_endpoint}:{params.data_dir}/{wildcards.project}/{params.transfer_dir} \
-            {params.dest_endpoint}:{params.dest_path}/{wildcards.project} \
+            {params.dest_endpoint}:{params.dest_path}/{wildcards.project}/{params.transfer_dir} \
             --recursive \
             --sync-level checksum \
             --verify-checksum \
