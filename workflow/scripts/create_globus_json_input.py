@@ -4,6 +4,7 @@ data flow.
 """
 import sys
 import json
+import os
 
 sys.stderr = open(snakemake.log[0], "w")
 
@@ -15,7 +16,7 @@ transfer_dir = snakemake.config["transfer_dir"]
 project = snakemake.wildcards.project
 src_path = f"{data_dir}/{project}/{transfer_dir}"
 
-dest_path = snakemake.config["dest_path"]
+dest_path = os.path.join(snakemake.config["dest_path"], project)
 
 input = {
     "source": {
