@@ -31,7 +31,7 @@ if delete_on_transfer:
             globus-automate flow run \
                 {params.globus_flow_id} \
                 --flow-input {input} \
-                --label "Transfer {wildcards.project}"
+                --label "Transfer {wildcards.project}" > {output}
             """
 
 
@@ -64,5 +64,5 @@ else:
                 --sync-level checksum \
                 --verify-checksum \
                 --fail-on-quota-errors \
-            --notify on > {output}
+                --notify on > {output}
             """
