@@ -14,11 +14,14 @@ if delete_on_transfer:
         script:
             "../scripts/create_globus_json_input.py"
 
+    # NOTE: this step will only invoke the transfer but there is no guarantee that it
+    # will be successful. Check the Globus dashboard for the status of the transfer.
     rule transfer:
         input:
             f"{data_dir}/{{project}}/{transfer_dir}/logs/{{project}}_globus_input.json",
         output:
-            f"{data_dir}/{{project}}/{transfer_dir}/logs/{{project}}_transfer.txt",
+            transfer_file=f"{data_dir}/{{project}}/{transfer_dir}/logs/{{project}}_transfer.txt",
+            complete_file=f"{data_dir}/{{project}}/processing.success",
         log:
             "logs/{project}_transfer.log",
         conda:
@@ -31,7 +34,9 @@ if delete_on_transfer:
             globus-automate flow run \
                 {params.globus_flow_id} \
                 --flow-input {input} \
-                --label "Transfer {wildcards.project}" > {output}
+                --label "Transfer {wildcards.project}" > {output.transfer_file}
+
+            touch {output.complete_file}
             """
 
 
