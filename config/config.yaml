@@ -11,6 +11,7 @@ transfer_dir: '_transfer'
 file_types:
     - 'reports'
     - 'fastq'
+    - 'fast5'
     - 'pod5'
     - 'fast5'
     - 'bam'
@@ -50,6 +51,13 @@ threads: 12
 
 # whether to transfer data upon archiving completion using Globus
 transfer: False
+
+# whether to delete data from source endpoint after transfer
+delete_on_transfer: False
+
+# Globus Flow ID to use for transfer (Move (copy and delete) files using Globus)
+# only used if delete_on_transfer flag is true
+globus_flow_id: 'f37e5766-7b3c-4c02-92ee-e6aacd8f4cb8'
 
 # this machine's Globus endpoint ID
 src_endpoint: ''
