@@ -129,7 +129,9 @@ rule archive_complete:
         transfer_path={params.data_dir}/{wildcards.project}/{params.transfer_dir}
         samples=`ls {params.data_dir}/{wildcards.project}/ | grep -v _transfer`
         for sample in $samples; do
-            tar_count=`cat $transfer_path/*/{wildcards.project}_${{sample}}*_list.txt | grep -v "/$" | wc -l`
+            count_file_regex=`echo -e ".*\/{wildcards.project}_${{sample}}_[pod5|bam|fast|reports].*_list\.txt"`
+            count_files=`find $transfer_path -type f -regex $count_file_regex`
+            tar_count=`cat $count_files | grep -v "/$" | wc -l`
             sys_file_count=`find {params.data_dir}/{wildcards.project}/$sample -type f | wc -l`
             echo "$sample tar file counts: $tar_count" >> {output}
             echo "$sample sys file counts: $sys_file_count" >> {output}
