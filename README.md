@@ -24,7 +24,7 @@ The file types handled can also be specified in the config, and includes reports
 
 The pipeline checks each tar file and outputs the files present to a text file. This is useful for validation. The `tar_file_counts.txt` and `system_file_counts.txt` files are created once archiving is complete, and lets you check that the counts on the file system and within your tar files matches. 
 
-Using the transfer automation requires setting up [Globus](https://www.globus.org/) endpoints. Refer to the [Globus documentation](https://docs.globus.org/) on how to do this. You will also have to manually authenticate on your first run of the pipeline. Make sure to set `transfer: True` if you want to use this, as well as your `src_endpoint`, `dest_endpoint` and `dest_path`. 
+Using the transfer automation requires setting up [Globus](https://www.globus.org/) endpoints. Refer to the [Globus documentation](https://docs.globus.org/) on how to do this. You will also have to manually authenticate on your first run of the pipeline. Make sure to set `transfer: True` if you want to use this, as well as your `src_endpoint`, `dest_endpoint` and `dest_path`. You can also set `delete_on_transfer: False` to delete the `_transfer` directory after a successful transfer. **NOTE: this will not delete anything outside of the `_transfer` directory.** We recommend setting up a robust run deletion workflow to ensure data is not accidently deleted.
 
 ## Installation
 
