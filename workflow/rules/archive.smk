@@ -127,7 +127,7 @@ rule archive_complete:
     shell:
         """
         transfer_path={params.data_dir}/{wildcards.project}/{params.transfer_dir}
-        samples=`ls {params.data_dir}/{wildcards.project}/ | grep -v _transfer`
+        samples=`find {params.data_dir}/{wildcards.project} -maxdepth 1 -mindepth 1 -type d -exec basename {{}} \; | grep -v _transfer`
         for sample in $samples; do
             count_file_regex=`echo -e ".*\/{wildcards.project}_${{sample}}_[pod5|bam|fast|reports].*_list\.txt"`
             count_files=`find $transfer_path -type f -regex $count_file_regex`
