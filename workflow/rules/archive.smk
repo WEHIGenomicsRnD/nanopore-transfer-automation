@@ -3,7 +3,7 @@ rule calculate_checksums:
         [f"{data_dir}/{project}/{sample}" for project, sample in zip(projects, samples)],
     output:
         expand(
-            "{data_dir}/{{project}}/{transfer_dir}/checksums/{{project}}_{{sample}}_checksums.sha1",
+            "{data_dir}/{{project}}/{transfer_dir}_{{sample}}/checksums/{{project}}_{{sample}}_checksums.sha1",
             data_dir=data_dir,
             transfer_dir=transfer_dir,
         ),
@@ -26,18 +26,18 @@ rule calculate_archive_checksums:
         get_outputs(file_types),
     output:
         expand(
-            "{data_dir}/{{project}}/{transfer_dir}/checksums/{{project}}_archives.sha1",
+            "{data_dir}/{{project}}/{transfer_dir}_{{sample}}/checksums/{{project}}_{{sample}}_archives.sha1",
             data_dir=data_dir,
             transfer_dir=transfer_dir,
         ),
     log:
-        "logs/{project}_archive_checksums.log",
+        "logs/{project}_{sample}_archive_checksums.log",
     threads: 1
     params:
         data_dir=data_dir,
     shell:
         """
-        cd {params.data_dir}/{wildcards.project} &&
+        cd {params.data_dir}/{wildcards.project}/{wildcards.sample} &&
             find . -type f -iname "*tar*" | xargs shasum -a 1 > {output}
         """
 
@@ -54,8 +54,8 @@ for project, sample in zip(projects, samples):
                 input:
                     f"{data_dir}/{project}/{sample}",
                 output:
-                    tar=f"{data_dir}/{project}/{transfer_dir}/{file_type}/{project}_{sample}_{file_type}_{state}.{ext}",
-                    txt=f"{data_dir}/{project}/{transfer_dir}/{file_type}/{project}_{sample}_{file_type}_{state}_list.txt",
+                    tar=f"{data_dir}/{project}/{transfer_dir}_{sample}/{file_type}/{project}_{sample}_{file_type}_{state}.{ext}",
+                    txt=f"{data_dir}/{project}/{transfer_dir}_{sample}/{file_type}/{project}_{sample}_{file_type}_{state}_list.txt",
                 log:
                     f"logs/{project}_{sample}_{file_type}_{state}_tar.log",
                 conda:
@@ -89,12 +89,12 @@ rule tar_reports:
         [f"{data_dir}/{project}/{sample}" for project, sample in zip(projects, samples)],
     output:
         tar=expand(
-            "{data_dir}/{{project}}/{transfer_dir}/reports/{{project}}_{{sample}}_reports.tar.gz",
+            "{data_dir}/{{project}}/{transfer_dir}_{{sample}}/reports/{{project}}_{{sample}}_reports.tar.gz",
             data_dir=data_dir,
             transfer_dir=transfer_dir,
         ),
         txt=expand(
-            "{data_dir}/{{project}}/{transfer_dir}/reports/{{project}}_{{sample}}_reports_list.txt",
+            "{data_dir}/{{project}}/{transfer_dir}_{{sample}}/reports/{{project}}_{{sample}}_reports_list.txt",
             data_dir=data_dir,
             transfer_dir=transfer_dir,
         ),
@@ -117,23 +117,20 @@ rule archive_complete:
     input:
         get_outputs(file_types),
     output:
-        f"{data_dir}/{{project}}/{transfer_dir}/logs/{{project}}_file_counts.txt",
+        f"{data_dir}/{{project}}/{transfer_dir}_{{sample}}/logs/{{project}}_{{sample}}_file_counts.txt",
     log:
-        "logs/{project}_archive_complete.txt",
+        "logs/{project}_{sample}_archive_complete.txt",
     threads: 1
     params:
         data_dir=data_dir,
         transfer_dir=transfer_dir,
     shell:
         """
-        transfer_path={params.data_dir}/{wildcards.project}/{params.transfer_dir}
-        samples=`find {params.data_dir}/{wildcards.project} -maxdepth 1 -mindepth 1 -type d -exec basename {{}} \; | grep -v _transfer`
-        for sample in $samples; do
-            count_file_regex=`echo -e ".*\/{wildcards.project}_${{sample}}_[pod5|bam|fast|reports].*_list\.txt"`
-            count_files=`find $transfer_path -type f -regex $count_file_regex`
-            tar_count=`cat $count_files | grep -v "/$" | wc -l`
-            sys_file_count=`find {params.data_dir}/{wildcards.project}/$sample -type f | wc -l`
-            echo "$sample tar file counts: $tar_count" >> {output}
-            echo "$sample sys file counts: $sys_file_count" >> {output}
-        done
+        transfer_path={params.data_dir}/{wildcards.project}/{params.transfer_dir}_{wildcards.sample}
+        count_file_regex=`echo -e ".*/{wildcards.project}_{wildcards.sample}_[pod5|bam|fast|reports].*_list.txt"`
+        count_files=`find $transfer_path -type f -regex $count_file_regex`
+        tar_count=`cat $count_files | grep -v "/$" | wc -l`
+        sys_file_count=`find {params.data_dir}/{wildcards.project}/{wildcards.sample} -type f | wc -l`
+        echo "{sample} tar file counts: $tar_count" >> {output}
+        echo "{sample} sys file counts: $sys_file_count" >> {output}
         """

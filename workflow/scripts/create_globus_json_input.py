@@ -14,7 +14,8 @@ dest_endpoint = snakemake.config["dest_endpoint"]
 data_dir = snakemake.config["data_dir"]
 transfer_dir = snakemake.config["transfer_dir"]
 project = snakemake.wildcards.project
-src_path = f"{data_dir}/{project}/{transfer_dir}"
+sample = snakemake.wildcards.sample
+src_path = f"{data_dir}/{project}/{transfer_dir}_{sample}"
 
 dest_path = os.path.join(snakemake.config["dest_path"], project)
 

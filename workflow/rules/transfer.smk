@@ -3,11 +3,11 @@ if delete_on_transfer:
     # NOTE: this step uses a Globus data flow, so first we need to create the json file
     rule create_globus_json_input:
         input:
-            f"{data_dir}/{{project}}/{transfer_dir}/logs/{{project}}_file_counts.txt",
+            f"{data_dir}/{{project}}/{transfer_dir}_{{sample}}/logs/{{project}}_{{sample}}_file_counts.txt",
         output:
-            f"{data_dir}/{{project}}/{transfer_dir}/logs/{{project}}_globus_input.json",
+            f"{data_dir}/{{project}}/{transfer_dir}_{{sample}}/logs/{{project}}_{{sample}}_globus_input.json",
         log:
-            "logs/{project}_create_globus_json.log",
+            "logs/{project}_{sample}_create_globus_json.log",
         conda:
             "../envs/python.yaml"
         threads: 1
@@ -18,12 +18,12 @@ if delete_on_transfer:
     # will be successful. Check the Globus dashboard for the status of the transfer.
     rule transfer:
         input:
-            f"{data_dir}/{{project}}/{transfer_dir}/logs/{{project}}_globus_input.json",
+            f"{data_dir}/{{project}}/{transfer_dir}_{{sample}}/logs/{{project}}_{{sample}}_globus_input.json",
         output:
-            transfer_file=f"{data_dir}/{{project}}/{transfer_dir}/logs/{{project}}_transfer.txt",
-            complete_file=f"{data_dir}/{{project}}/processing.success",
+            transfer_file=f"{data_dir}/{{project}}/{transfer_dir}_{{sample}}/logs/{{project}}_{{sample}}_transfer.txt",
+            complete_file=f"{data_dir}/{{project}}/{{sample}}/processing.success",
         log:
-            "logs/{project}_transfer.log",
+            "logs/{project}_{sample}_transfer.log",
         conda:
             "../envs/globus_automate.yaml"
         threads: 1
@@ -46,11 +46,11 @@ else:
     # will be successful. Check the Globus dashboard for the status of the transfer.
     rule transfer:
         input:
-            f"{data_dir}/{{project}}/{transfer_dir}/logs/{{project}}_file_counts.txt",
+            f"{data_dir}/{{project}}/{transfer_dir}_{{sample}}/logs/{{project}}_{{sample}}_file_counts.txt",
         output:
-            f"{data_dir}/{{project}}/{transfer_dir}/logs/{{project}}_transfer.txt",
+            f"{data_dir}/{{project}}/{transfer_dir}_{{sample}}/logs/{{project}}_{{sample}}_transfer.txt",
         log:
-            "logs/{project}_transfer.log",
+            "logs/{project}_{sample}_transfer.log",
         conda:
             "../envs/globus.yaml"
         threads: 1
