@@ -1,7 +1,6 @@
-import pandas as pd
-import numpy as np
 import os
 import re
+import sys
 from glob import iglob
 
 # variables
@@ -54,6 +53,7 @@ if ignore_proj_regex and not extra_dirs:
     )
     sys.exit()
 
+
 # functions
 def get_project_dirs(data_dir, proj_dir_regex):
     """
@@ -85,7 +85,16 @@ def is_run_complete(sample_dir):
     return any(run_complete)
 
 
-def is_processing_complete(project_dir_full):
+def is_run_processing_complete(sample_dir):
+    """
+    Checks whether sample has already been processed
+    through precense of processing.success file
+    """
+    processing_complete_file = os.path.join(sample_dir, "processing.success")
+    return os.path.exists(processing_complete_file)
+
+
+def is_project_processing_complete(project_dir_full):
     """
     Checks whether run has already been archived;
     this is indicated by the presence of a file under
@@ -139,8 +148,7 @@ project_dirs = list(
     filter(lambda project: project is not None and project != "", project_dirs)
 )
 for proj_dir in project_dirs:
-    print(f"Found project directory {proj_dir}.", file=sys.stderr)
-projects_with_incomplete_runs = []
+    print(f"Found project directory {proj_dir}.", file=sys.stdout)
 
 
 projects, samples = [], []
@@ -149,11 +157,11 @@ for project in project_dirs:
     if not os.path.exists(project_dir_full):
         print(
             f"Project directory {project} does not exist; skipping.",
-            file=sys.stderr,
+            file=sys.stdout,
         )
         continue
 
-    if is_processing_complete(project_dir_full):
+    if is_project_processing_complete(project_dir_full):
         print(
             f"Processing of project {project} already complete; skipping.",
             file=sys.stdout,
@@ -168,24 +176,29 @@ for project in project_dirs:
     # add both projects and sample to keep their association together
     for sample in samples_in_project:
         sample_dir = os.path.join(project_dir_full, sample)
-        if not check_if_complete or is_run_complete(sample_dir):
+        if is_run_processing_complete(sample_dir):
             print(
-                f"Found {sample} in project {project} for processing.", file=sys.stderr
+                f"Processing of {sample} in project {project} already complete.",
+                file=sys.stdout,
+            )
+        elif not check_if_complete or is_run_complete(sample_dir):
+            print(
+                f"Found {sample} in project {project} for processing.",
+                file=sys.stdout,
             )
             projects.append(project)
             samples.append(sample)
         elif check_if_complete and not is_run_complete(sample_dir):
             print(
                 f"Skipping {sample} in project {project} (run incomplete).",
-                file=sys.stderr,
+                file=sys.stdout,
             )
-            projects_with_incomplete_runs.append(project)
 
 
 # input/output functions
 def get_checksum_outputs():
     checksum_outputs = [
-        f"{data_dir}/{project}/{transfer_dir}/checksums/{project}_{sample}_checksums.sha1"
+        f"{data_dir}/{project}/{transfer_dir}_{sample}/checksums/{project}_{sample}_checksums.sha1"
         for project, sample in zip(projects, samples)
     ]
     return checksum_outputs
@@ -195,10 +208,10 @@ def get_report_outputs():
     report_outputs = []
     for project, sample in zip(projects, samples):
         report_outputs.append(
-            f"{data_dir}/{project}/{transfer_dir}/reports/{project}_{sample}_reports.tar.gz"
+            f"{data_dir}/{project}/{transfer_dir}_{sample}/reports/{project}_{sample}_reports.tar.gz"
         )
         report_outputs.append(
-            f"{data_dir}/{project}/{transfer_dir}/reports/{project}_{sample}_reports_list.txt"
+            f"{data_dir}/{project}/{transfer_dir}_{sample}/reports/{project}_{sample}_reports_list.txt"
         )
     return report_outputs
 
@@ -211,7 +224,7 @@ def get_output_by_type(filetype):
         files_under_sample = [
             os.path.basename(f) for f in iglob(f"{data_dir}/{project}/{sample}/*/*")
         ]
-        out_prefix = f"{data_dir}/{project}/{transfer_dir}/{filetype}/{project}_{sample}_{filetype}"
+        out_prefix = f"{data_dir}/{project}/{transfer_dir}_{sample}/{filetype}/{project}_{sample}_{filetype}"
         for state in STATES:
             if f"{filetype}_{state}" in files_under_sample:
                 outputs.append(f"{out_prefix}_{state}.{file_extension}")
@@ -238,18 +251,16 @@ def get_outputs(file_types):
 
 
 def get_final_checksum_outputs():
-    final_checksum_outputs = expand(
-        "{data_dir}/{project}/{transfer_dir}/checksums/{project}_archives.sha1",
-        data_dir=data_dir,
-        project=np.unique(projects),
-        transfer_dir=transfer_dir,
-    )
+    final_checksum_outputs = [
+        f"{data_dir}/{project}/{transfer_dir}_{sample}/checksums/{project}_{sample}_archives.sha1"
+        for project, sample in zip(projects, samples)
+    ]
     return final_checksum_outputs
 
 
 def get_validate_reports_outputs():
     validate_reports_outputs = [
-        f"{data_dir}/{project}/{transfer_dir}/reports/{project}_{sample}_reports_list.txt"
+        f"{data_dir}/{project}/{transfer_dir}_{sample}/reports/{project}_{sample}_reports_list.txt"
         for project, sample in zip(projects, samples)
     ]
     return validate_reports_outputs
@@ -257,9 +268,8 @@ def get_validate_reports_outputs():
 
 def get_archive_complete_outputs():
     archive_complete_outputs = [
-        f"{data_dir}/{project}/{transfer_dir}/logs/{project}_file_counts.txt"
-        for project in np.unique(projects)
-        if project not in projects_with_incomplete_runs
+        f"{data_dir}/{project}/{transfer_dir}_{sample}/logs/{project}_{sample}_file_counts.txt"
+        for project, sample in zip(projects, samples)
     ]
     return archive_complete_outputs
 
@@ -267,9 +277,8 @@ def get_archive_complete_outputs():
 def get_transfer_outputs():
     if transfer:
         transfer_outputs = [
-            f"{data_dir}/{project}/{transfer_dir}/logs/{project}_transfer.txt"
-            for project in np.unique(projects)
-            if project not in projects_with_incomplete_runs
+            f"{data_dir}/{project}/{transfer_dir}_{sample}/logs/{project}_{sample}_transfer.txt"
+            for project, sample in zip(projects, samples)
         ]
         return transfer_outputs
     else:
