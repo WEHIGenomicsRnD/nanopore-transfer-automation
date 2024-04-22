@@ -225,10 +225,15 @@ def get_output_by_type(filetype):
             os.path.basename(f) for f in iglob(f"{data_dir}/{project}/{sample}/*/*")
         ]
         out_prefix = f"{data_dir}/{project}/{transfer_dir}_{sample}/{filetype}/{project}_{sample}_{filetype}"
-        for state in STATES:
-            if f"{filetype}_{state}" in files_under_sample:
-                outputs.append(f"{out_prefix}_{state}.{file_extension}")
-                outputs.append(f"{out_prefix}_{state}_list.txt")
+        if filetype == "pod5":
+            if f"{filetype}" in files_under_sample:
+                outputs.append(f"{out_prefix}.{file_extension}")
+                outputs.append(f"{out_prefix}_list.txt")
+        else:
+            for state in STATES:
+                if f"{filetype}_{state}" in files_under_sample:
+                    outputs.append(f"{out_prefix}_{state}.{file_extension}")
+                    outputs.append(f"{out_prefix}_{state}_list.txt")
 
     return outputs
 

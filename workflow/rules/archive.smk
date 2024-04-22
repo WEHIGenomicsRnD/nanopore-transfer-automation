@@ -43,8 +43,40 @@ rule calculate_archive_checksums:
         """
 
 
+if "pod5" in file_types:
+    for project, sample in zip(projects, samples):
+
+        rule:
+            name:
+                f"tar_{project}_{sample}_pod5"
+            input:
+                f"{data_dir}/{project}/{sample}",
+            output:
+                tar=f"{data_dir}/{project}/{transfer_dir}_{sample}/pod5/{project}_{sample}_pod5.tar.gz",
+                txt=f"{data_dir}/{project}/{transfer_dir}_{sample}/pod5/{project}_{sample}_pod5_list.txt",
+            log:
+                f"logs/{project}_{sample}_pod5_tar.log",
+            conda:
+                "../envs/archive.yaml"
+            threads: config["threads"]
+            params:
+                data_dir=data_dir,
+                project=project,
+                sample=sample,
+            shell:
+                """
+                cd {params.data_dir}/{params.project} &&
+                    find {params.sample}/*/pod5 -iname "*.pod5" |
+                    tar -cvf - --files-from - |
+                    pigz -p {threads} > {output.tar} ;
+                tar -tvf <(pigz -dc {output.tar}) >> {output.txt}
+                """
+
+
 for project, sample in zip(projects, samples):
     for file_type in file_types:
+        if file_type == "pod5":
+            continue
         for state in STATES:
             ext = "tar" if file_type in ["fastq", "bam"] else "tar.gz"
             threads = 1 if file_type in ["fastq", "bam"] else config["threads"]

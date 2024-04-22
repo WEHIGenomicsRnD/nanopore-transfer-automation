@@ -15,19 +15,20 @@ def make_run(basedir, subdirs, flowcellid, runhex, is_finished):
         open(sequencing_summary, 'a').close()
     random_fastq_pass = os.path.join(basedir, 'fastq_pass', f'{get_random_hexstring(1e8)}.fastq.gz')
     random_fastq_fail = os.path.join(basedir, 'fastq_fail', f'{get_random_hexstring(1e8)}.fastq.gz')
-    random_pod5_pass = os.path.join(basedir, 'pod5_pass', f'{get_random_hexstring(1e8)}.pod5')
-    random_pod5_fail = os.path.join(basedir, 'pod5_fail', f'{get_random_hexstring(1e8)}.pod5')
-    random_report = os.path.join(basedir, f'report_{get_random_hexstring(1e8)}.html')
+    random_pod5 = os.path.join(basedir, 'pod5', f'{get_random_hexstring(1e8)}.pod5')
+    report_hexstring = get_random_hexstring(1e8)
+    random_report = os.path.join(basedir, f'report_{report_hexstring}.html')
+    random_json = os.path.join(basedir, f'report_{report_hexstring}.json')
     open(random_fastq_pass, 'a').close()
     open(random_fastq_fail, 'a').close()
-    open(random_pod5_pass, 'a').close()
-    open(random_pod5_fail, 'a').close()
+    open(random_pod5, 'a').close()
     open(random_report, 'a').close()
+    open(random_json, 'a').close()
 
 ### create test data ###
 
 # directories found under every promethION run
-subdirs = ['pod5_pass', 'pod5_fail', 'fastq_pass', 'fastq_fail', 'other_reports']
+subdirs = ['pod5', 'fastq_pass', 'fastq_fail', 'other_reports']
 
 # some example values
 date = '20221208'
