@@ -136,11 +136,17 @@ rule tar_reports:
     threads: config["threads"]
     params:
         data_dir=data_dir,
+        transfer_dir=transfer_dir,
     shell:
         """
         cd {params.data_dir}/{wildcards.project} && tar -cvf - {wildcards.sample}/*/*.* {wildcards.sample}/*/other_reports |
             pigz -p {threads} > {output.tar} ;
-        tar -tvf <(pigz -dc {output.tar}) >> {output.txt}
+        tar -tvf <(pigz -dc {output.tar}) >> {output.txt} ;
+        reports_transfer_dir={params.data_dir}/{wildcards.project}/{params.transfer_dir}_{wildcards.sample}/reports ;
+        for report_file in {wildcards.sample}/*/report_*.* ; do
+            report_basename=`basename $report_file`;
+            cp ${{report_file}} ${{reports_transfer_dir}}/{wildcards.project}_{wildcards.sample}_${{report_basename}} ;
+        done
         """
 
 
