@@ -28,8 +28,8 @@ input = {
         "id": dest_endpoint,
         "path": dest_path
     },
-    "transfer_label": f"Transfer archives for {project}",
-    "delete_label": f"Delete source archives for {project}"
+    "transfer_label": f"Transfer archives for {sample} from {project}",
+    "delete_label": f"Delete source archives for {sample} from {project}"
 }
 
 with open(snakemake.output[0], "w") as f:

@@ -35,9 +35,10 @@ rule calculate_archive_checksums:
     threads: 1
     params:
         data_dir=data_dir,
+        transfer_dir=transfer_dir,
     shell:
         """
-        cd {params.data_dir}/{wildcards.project}/{wildcards.sample} &&
+        cd {params.data_dir}/{wildcards.project}/{params.transfer_dir}_{wildcards.sample} &&
             find . -type f -iname "*tar*" | xargs shasum -a 1 > {output}
         """
 
