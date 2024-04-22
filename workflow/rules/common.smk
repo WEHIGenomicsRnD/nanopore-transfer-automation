@@ -229,11 +229,10 @@ def get_output_by_type(filetype):
             if f"{filetype}" in files_under_sample:
                 outputs.append(f"{out_prefix}.{file_extension}")
                 outputs.append(f"{out_prefix}_list.txt")
-        else:
-            for state in STATES:
-                if f"{filetype}_{state}" in files_under_sample:
-                    outputs.append(f"{out_prefix}_{state}.{file_extension}")
-                    outputs.append(f"{out_prefix}_{state}_list.txt")
+        for state in STATES:
+            if f"{filetype}_{state}" in files_under_sample:
+                outputs.append(f"{out_prefix}_{state}.{file_extension}")
+                outputs.append(f"{out_prefix}_{state}_list.txt")
 
     return outputs
 
