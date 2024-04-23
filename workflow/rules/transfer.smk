@@ -3,7 +3,8 @@ if delete_on_transfer:
     # NOTE: this step uses a Globus data flow, so first we need to create the json file
     rule create_globus_json_input:
         input:
-            f"{data_dir}/{{project}}/{transfer_dir}_{{sample}}/logs/{{project}}_{{sample}}_file_counts.txt",
+            counts=f"{data_dir}/{{project}}/{transfer_dir}_{{sample}}/logs/{{project}}_{{sample}}_file_counts.txt",
+            checksums=f"{data_dir}/{{project}}/{transfer_dir}_{{sample}}/checksums/{{project}}_{{sample}}_archives.sha1",
         output:
             f"{data_dir}/{{project}}/{transfer_dir}_{{sample}}/logs/{{project}}_{{sample}}_globus_input.json",
         log:
@@ -45,7 +46,8 @@ else:
     # will be successful. Check the Globus dashboard for the status of the transfer.
     rule transfer:
         input:
-            f"{data_dir}/{{project}}/{transfer_dir}_{{sample}}/logs/{{project}}_{{sample}}_file_counts.txt",
+            counts=f"{data_dir}/{{project}}/{transfer_dir}_{{sample}}/logs/{{project}}_{{sample}}_file_counts.txt",
+            checksums=f"{data_dir}/{{project}}/{transfer_dir}_{{sample}}/checksums/{{project}}_{{sample}}_archives.sha1",
         output:
             f"{data_dir}/{{project}}/{transfer_dir}_{{sample}}/logs/{{project}}_{{sample}}_transfer.txt",
         log:
