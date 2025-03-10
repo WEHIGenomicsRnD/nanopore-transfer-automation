@@ -147,7 +147,7 @@ rule tar_reports:
         reports_transfer_dir={params.data_dir}/{wildcards.project}/{params.transfer_dir}_{wildcards.sample}/{wildcards.run}/reports ;
         for report_file in {wildcards.sample}/{wildcards.run}/report_*.* ; do
             report_basename=`basename $report_file`;
-            cp ${{report_file}} ${{reports_transfer_dir}}/{wildcards.project}_{wildcards.sample}_{wildcards.run_uid}_{{report_basename}} ;
+            cp ${{report_file}} ${{reports_transfer_dir}}/{wildcards.project}_{wildcards.sample}_{wildcards.run_uid}_${{report_basename}} ;
         done
         """
 
