@@ -19,7 +19,6 @@ ignore_proj_regex = str(config["ignore_proj_regex"]).lower() == "true"
 check_if_complete = str(config["check_if_complete"]).lower() == "true"
 transfer = str(config["transfer"]).lower() == "true"
 delete_on_transfer = str(config["delete_on_transfer"]).lower() == "true"
-
 # error check input
 if not os.path.exists(data_dir):
     print("Data directory does not exist, exiting.", file=sys.stderr)
