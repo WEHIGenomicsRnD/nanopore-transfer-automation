@@ -22,6 +22,7 @@ if delete_on_transfer:
             f"{data_dir}/{{project}}/{transfer_dir}_{{sample}}/{{run}}/logs/{{project}}_{{sample}}_{{run_uid}}_globus_input.json",
         output:
             transfer_file=f"{data_dir}/{{project}}/{transfer_dir}_{{sample}}/{{run}}/logs/{{project}}_{{sample}}_{{run_uid}}_transfer.txt",
+            complete_file=f"{data_dir}/{{project}}/{{sample}}/{{run}}/{{run_uid}}.processing.success",
         log:
             "logs/{run}/{project}_{sample}_{run_uid}_transfer.log",
         conda:
@@ -34,9 +35,9 @@ if delete_on_transfer:
             globus-automate flow run \
                 {params.globus_flow_id} \
                 --flow-input {input} \
-                --label "Transfer {wildcards.project}" > f"{data_dir}/{{project}}/{{sample}}/{{run}}/processing.success"
+                --label "Transfer {wildcards.project}" > {output.transfer_file}
 
-            touch f"{data_dir}/{{project}}/{{sample}}/{{run}}/processing.success"
+            touch {output.complete_file}
             """
 
 else:

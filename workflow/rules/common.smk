@@ -90,9 +90,12 @@ def is_run_processing_complete(run_dir,project_dir_full):
     """
     sample=run_dir.split("/")[-2]
     run=run_dir.split("/")[-1]
+    run_uid=run.split("_")[-1]
+    cfile_name=".".join([run,"processing.success"])
     trans_dir="_".join([transfer_dir,sample])
     transfer_dir_full = os.path.join(project_dir_full,trans_dir,run)
-    processing_complete_file = os.path.join(run_dir, "processing.success")
+    processing_complete_file = os.path.join(run_dir, cfile_name)
+
     if os.path.exists(transfer_dir_full):
         files_in_transfer_dir = next(os.walk(transfer_dir_full))[1]
         final_file = "transfer.txt" if transfer else "tar_file_counts.txt"
