@@ -91,7 +91,7 @@ def is_run_processing_complete(run_dir,project_dir_full):
     sample=run_dir.split("/")[-2]
     run=run_dir.split("/")[-1]
     run_uid=run.split("_")[-1]
-    cfile_name=".".join([run,"processing.success"])
+    cfile_name=".".join([run_uid,"processing.success"])
     trans_dir="_".join([transfer_dir,sample])
     transfer_dir_full = os.path.join(project_dir_full,trans_dir,run)
     processing_complete_file = os.path.join(run_dir, cfile_name)
@@ -227,6 +227,7 @@ for project in project_dirs:
                    f"Processing of {run} for {sample} in project {project} already complete; skipping",
                    file=sys.stdout,
                )
+               continue
            elif not check_if_complete or is_run_complete(run_dir):
                print(
                    f"Found {run_sample} in project {project} for processing.",
