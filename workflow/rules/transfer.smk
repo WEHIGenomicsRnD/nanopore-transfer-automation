@@ -3,12 +3,12 @@ if delete_on_transfer:
     # NOTE: this step uses a Globus data flow, so first we need to create the json file
     rule create_globus_json_input:
         input:
-            counts=f"{data_dir}/{{project}}/{transfer_dir}_{{sample}}/{{run}}/logs/{{project}}_{{sample}}_{{run_uid}}_file_counts.txt",
-            checksums=f"{data_dir}/{{project}}/{transfer_dir}_{{sample}}/{{run}}/checksums/{{project}}_{{sample}}_{{run_uid}}_archives.sha1",
+            counts=f"{data_dir}/{{project}}/{transfer_dir}_{{sample}}_{{run_uid}}/logs/{{project}}_{{sample}}_{{run_uid}}_file_counts.txt",
+            checksums=f"{data_dir}/{{project}}/{transfer_dir}_{{sample}}_{{run_uid}}/checksums/{{project}}_{{sample}}_{{run_uid}}_archives.sha1",
         output:
-            f"{data_dir}/{{project}}/{transfer_dir}_{{sample}}/{{run}}/logs/{{project}}_{{sample}}_{{run_uid}}_globus_input.json",
+            f"{data_dir}/{{project}}/{transfer_dir}_{{sample}}_{{run_uid}}/logs/{{project}}_{{sample}}_{{run_uid}}_globus_input.json",
         log:
-            "logs/{run}/{project}_{sample}_{run_uid}_create_globus_json.log",
+            "logs/{project}_{sample}_{run_uid}_create_globus_json.log",
         conda:
             "../envs/python.yaml"
         threads: 1
@@ -19,12 +19,12 @@ if delete_on_transfer:
     # will be successful. Check the Globus dashboard for the status of the transfer.
     rule transfer:
         input:
-            f"{data_dir}/{{project}}/{transfer_dir}_{{sample}}/{{run}}/logs/{{project}}_{{sample}}_{{run_uid}}_globus_input.json",
+            f"{data_dir}/{{project}}/{transfer_dir}_{{sample}}_{{run_uid}}/logs/{{project}}_{{sample}}_{{run_uid}}_globus_input.json",
         output:
-            transfer_file=f"{data_dir}/{{project}}/{transfer_dir}_{{sample}}/{{run}}/logs/{{project}}_{{sample}}_{{run_uid}}_transfer.txt",
-            complete_file=f"{data_dir}/{{project}}/{{sample}}/{{run}}/{{run_uid}}.processing.success",
+            transfer_file=f"{data_dir}/{{project}}/{transfer_dir}_{{sample}}_{{run_uid}}/logs/{{project}}_{{sample}}_{{run_uid}}_transfer.txt",
+            complete_file=f"{data_dir}/{{project}}/{{sample}}/{{run_uid}}.processing.success",
         log:
-            "logs/{run}/{project}_{sample}_{run_uid}_transfer.log",
+            "logs/{project}_{sample}_{run_uid}_transfer.log",
         conda:
             "../envs/globus_automate.yaml"
         threads: 1
@@ -46,12 +46,12 @@ else:
     # will be successful. Check the Globus dashboard for the status of the transfer.
     rule transfer:
         input:
-            counts=f"{data_dir}/{{project}}/{transfer_dir}_{{sample}}/{{run}}/logs/{{project}}_{{sample}}_{{run_uid}}_file_counts.txt",
-            checksums=f"{data_dir}/{{project}}/{transfer_dir}_{{sample}}/{{run}}/checksums/{{project}}_{{sample}}_{{run_uid}}_archives.sha1",
+            counts=f"{data_dir}/{{project}}/{transfer_dir}_{{sample}}_{{run_uid}}/logs/{{project}}_{{sample}}_{{run_uid}}_file_counts.txt",
+            checksums=f"{data_dir}/{{project}}/{transfer_dir}_{{sample}}_{{run_uid}}/checksums/{{project}}_{{sample}}_{{run_uid}}_archives.sha1",
         output:
-            f"{data_dir}/{{project}}/{transfer_dir}_{{sample}}/{{run}}/logs/{{project}}_{{sample}}_{{run_uid}}_transfer.txt",
+            f"{data_dir}/{{project}}/{transfer_dir}_{{sample}}_{{run_uid}}/logs/{{project}}_{{sample}}_{{run_uid}}_transfer.txt",
         log:
-            "logs/{run}/{project}_{sample}_{run_uid}_transfer.log",
+            "logs/{project}_{sample}_{run_uid}_transfer.log",
         conda:
             "../envs/globus.yaml"
         threads: 1

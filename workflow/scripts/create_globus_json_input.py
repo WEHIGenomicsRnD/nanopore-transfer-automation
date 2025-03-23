@@ -16,8 +16,9 @@ transfer_dir = snakemake.config["transfer_dir"]
 project = snakemake.wildcards.project
 sample = snakemake.wildcards.sample
 run = snakemake.wildcards.run
-td_smp="_".join([transfer_dir,sample])
-src_path = f"{data_dir}/{project}/{transfer_dir}_{sample}/{run}"
+run_uid = snakemake.wildcards.run_uid
+td_smp="_".join([transfer_dir,sample,run_uid])
+src_path = f"{data_dir}/{project}/{transfer_dir}_{sample}_{run_uid}"
 
 dest_path = os.path.join(snakemake.config["dest_path"], project,td_smp)
 print(f"Dest path : {dest_path}")
