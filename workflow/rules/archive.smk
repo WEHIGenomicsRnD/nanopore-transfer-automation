@@ -14,10 +14,11 @@ rule calculate_checksums:
     threads: 1
     params:
         data_dir=data_dir,
+        run=run,
     shell:
         """
         cd {params.data_dir}/{wildcards.project} &&
-            find {wildcards.sample}/{wildcards.run}/* -type f | xargs shasum -a 1 > {output}
+            find {wildcards.sample}/{params.run}/* -type f | xargs shasum -a 1 > {output}
         """
 
 
