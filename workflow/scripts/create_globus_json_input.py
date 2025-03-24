@@ -15,7 +15,6 @@ data_dir = snakemake.config["data_dir"]
 transfer_dir = snakemake.config["transfer_dir"]
 project = snakemake.wildcards.project
 sample = snakemake.wildcards.sample
-run = snakemake.wildcards.run
 run_uid = snakemake.wildcards.run_uid
 td_smp="_".join([transfer_dir,sample,run_uid])
 src_path = f"{data_dir}/{project}/{transfer_dir}_{sample}_{run_uid}"
@@ -32,8 +31,8 @@ input = {
         "id": dest_endpoint,
         "path": dest_path
     },
-    "transfer_label": f"Transfer archives for {sample}-{run} from {project}",
-    "delete_label": f"Delete source archives for {sample}-{run} from {project}"
+    "transfer_label": f"Transfer archives for {sample}-{run_uid} from {project}",
+    "delete_label": f"Delete source archives for {sample}-{run_uid} from {project}"
 }
 
 with open(snakemake.output[0], "w") as f:

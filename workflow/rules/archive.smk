@@ -14,13 +14,10 @@ rule calculate_checksums:
     threads: 1
     params:
         data_dir=data_dir,
-        run=run,
-        sample=sample,
-        project=project,
     shell:
         """
-        cd {params.data_dir}/{params.project} &&
-            find {params.sample}/{params.run}/* -type f | xargs shasum -a 1 > {output}
+        cd {params.data_dir}/{wildcards.project} &&
+            find {wildcards.sample}/{wildcards.run}/* -type f | xargs shasum -a 1 > {output}
         """
 
 
@@ -39,12 +36,9 @@ rule calculate_archive_checksums:
     params:
         data_dir=data_dir,
         transfer_dir=transfer_dir,
-        run=run,
-        project=project,
-        sample=sample,
     shell:
         """
-        cd {params.data_dir}/{params.project}/{params.transfer_dir}_{params.sample}_{wildcards.run_uid}/{params.run} &&
+        cd {params.data_dir}/{wildcards.project}/{params.transfer_dir}_{wildcards.sample}_{wildcards.run_uid} &&
             find . -type f -iname "*tar*" | xargs shasum -a 1 > {output}
         """
 
