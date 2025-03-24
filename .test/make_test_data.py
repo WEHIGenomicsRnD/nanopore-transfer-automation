@@ -44,8 +44,13 @@ samples = ['sample_a', 'sample_b']
 #if os.path.exists('test_data'):
 #    shutil.rmtree('test_data')
 for run in runs:
-    runhex = get_random_hexstring(1e8)
     for sample in samples:
+        runhex = get_random_hexstring(1e8)
+        basedir = f'test_data/{date}_{affiliation}_{lab}_{run}/{sample}/{date}_1111_2F_{flowcellid}_{runhex}'
+        make_run(basedir, subdirs, flowcellid, runhex, runs[run])
+
+        # make a second run
+        runhex = get_random_hexstring(1e8)
         basedir = f'test_data/{date}_{affiliation}_{lab}_{run}/{sample}/{date}_1111_2F_{flowcellid}_{runhex}'
         make_run(basedir, subdirs, flowcellid, runhex, runs[run])
 
