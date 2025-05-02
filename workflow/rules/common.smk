@@ -251,7 +251,7 @@ for project in project_dirs:
 # input/output functions
 def get_checksum_outputs():
     checksum_outputs = [
-        f"{data_dir}/{project}/{transfer_dir}_{sample}_{run_uid}/checksums/{project}_{sample}_{run_uid}_checksums.sha1"
+        f"{data_dir}/{project}/{transfer_dir}_{sample}_{run}/checksums/{project}_{sample}_{run_uid}_checksums.sha1"
         for project, sample, run, run_uid in zip(projects, samples,runs , runs_uid)
     ]
     return checksum_outputs
@@ -261,10 +261,10 @@ def get_report_outputs():
     report_outputs = []
     for project, sample, run, run_uid in zip(projects, samples,runs, runs_uid):
         report_outputs.append(
-            f"{data_dir}/{project}/{transfer_dir}_{sample}_{run_uid}/reports/{project}_{sample}_{run_uid}_reports.tar.gz"
+            f"{data_dir}/{project}/{transfer_dir}_{sample}_{run}/reports/{project}_{sample}_{run_uid}_reports.tar.gz"
         )
         report_outputs.append(
-            f"{data_dir}/{project}/{transfer_dir}_{sample}_{run_uid}/reports/{project}_{sample}_{run_uid}_reports_list.txt"
+            f"{data_dir}/{project}/{transfer_dir}_{sample}_{run}/reports/{project}_{sample}_{run_uid}_reports_list.txt"
         )
     return report_outputs
 
@@ -277,7 +277,7 @@ def get_output_by_type(filetype):
         files_under_sample = [
             os.path.basename(f) for f in iglob(f"{data_dir}/{project}/{sample}/{run}/*")
         ]
-        out_prefix = f"{data_dir}/{project}/{transfer_dir}_{sample}_{run_uid}/{filetype}/{project}_{sample}_{run_uid}_{filetype}"
+        out_prefix = f"{data_dir}/{project}/{transfer_dir}_{sample}_{run}/{filetype}/{project}_{sample}_{run_uid}_{filetype}"
         if filetype == "pod5":
             if f"{filetype}" in files_under_sample:
                 outputs.append(f"{out_prefix}.{file_extension}")
@@ -309,7 +309,7 @@ def get_outputs(file_types):
 
 def get_final_checksum_outputs():
     final_checksum_outputs = [
-        f"{data_dir}/{project}/{transfer_dir}_{sample}_{run_uid}/checksums/{project}_{sample}_{run_uid}_archives.sha1"
+        f"{data_dir}/{project}/{transfer_dir}_{sample}_{run}/checksums/{project}_{sample}_{run_uid}_archives.sha1"
         for project, sample, run, run_uid in zip(projects, samples, runs, runs_uid)
     ]
     return final_checksum_outputs
@@ -317,7 +317,7 @@ def get_final_checksum_outputs():
 
 def get_validate_reports_outputs():
     validate_reports_outputs = [
-        f"{data_dir}/{project}/{transfer_dir}_{sample}_{run_uid}/reports/{project}_{sample}_{run_uid}_reports_list.txt"
+        f"{data_dir}/{project}/{transfer_dir}_{sample}_{run}/reports/{project}_{sample}_{run_uid}_reports_list.txt"
         for project, sample, run, run_uid in zip(projects, samples, runs, runs_uid)
     ]
     return validate_reports_outputs
@@ -325,7 +325,7 @@ def get_validate_reports_outputs():
 
 def get_archive_complete_outputs():
     archive_complete_outputs = [
-        f"{data_dir}/{project}/{transfer_dir}_{sample}_{run_uid}/logs/{project}_{sample}_{run_uid}_file_counts.txt"
+        f"{data_dir}/{project}/{transfer_dir}_{sample}_{run}/logs/{project}_{sample}_{run_uid}_file_counts.txt"
         for project, sample, run, run_uid in zip(projects, samples, runs, runs_uid)
     ]
     return archive_complete_outputs
@@ -334,7 +334,7 @@ def get_archive_complete_outputs():
 def get_transfer_outputs():
     if transfer:
         transfer_outputs = [
-            f"{data_dir}/{project}/{transfer_dir}_{sample}_{run_uid}/logs/{project}_{sample}_{run_uid}_transfer.txt"
+            f"{data_dir}/{project}/{transfer_dir}_{sample}_{run}/logs/{project}_{sample}_{run_uid}_transfer.txt"
             for project, sample, run, run_uid in zip(projects, samples, runs, runs_uid)
         ]
         return transfer_outputs
