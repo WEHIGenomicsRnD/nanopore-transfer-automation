@@ -100,9 +100,10 @@ def is_run_processing_complete(run_dir, project_dir_full):
     run = run_dir.split("/")[-1]
     run_uid = run.split("_")[-1]
     cfile_name = ".".join([run_uid, "processing.success"])
-    trans_dir = "_".join([transfer_dir, sample, run_uid])
+    trans_dir = "_".join([transfer_dir, sample, run])
     transfer_dir_full = os.path.join(project_dir_full, trans_dir)
-    processing_complete_file = os.path.join(project_dir_full, sample, cfile_name)
+#    processing_complete_file = os.path.join(project_dir_full, sample, cfile_name)
+    processing_complete_file = os.path.join(project_dir_full, sample, run, cfile_name)
     print(f"Process file: {processing_complete_file}")
 
     if os.path.exists(transfer_dir_full):
@@ -315,6 +316,6 @@ for project in project_dirs:
                     file=sys.stdout,
                 )
 
-        print(f"rin sample - {runs_uid}")
-        print(f" sample - {samples}")
-        print(f" project - {projects}")
+#        print(f"rin sample - {runs_uid}")
+#        print(f" sample - {samples}")
+#        print(f" project - {projects}")

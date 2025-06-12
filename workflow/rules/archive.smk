@@ -127,7 +127,7 @@ rule tar_reports:
     input:
         [
             f"{data_dir}/{project}/{sample}/{run}"
-            for project, sample, run, ruin_uid in zip(
+            for project, sample, run, run_uid in zip(
                 projects, samples, runs, runs_uid
             )
         ],
@@ -150,9 +150,7 @@ rule tar_reports:
     params:
         data_dir=data_dir,
         transfer_dir=transfer_dir,
-        run=run,
         project=project,
-        run_uid=run_uid,
         sample=sample,
     shell:
         """
@@ -178,9 +176,7 @@ rule archive_complete:
     params:
         data_dir=data_dir,
         transfer_dir=transfer_dir,
-        run=run,
         sample=sample,
-        run_uid=run_uid,
         project=project,
     shell:
         """
