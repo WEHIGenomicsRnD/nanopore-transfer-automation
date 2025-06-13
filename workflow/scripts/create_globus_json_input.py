@@ -16,6 +16,7 @@ transfer_dir = snakemake.config["transfer_dir"]
 project = snakemake.wildcards.project
 sample = snakemake.wildcards.sample
 run_uid = snakemake.wildcards.run_uid
+run = snakemake.wildcards.run
 td_smp="_".join([transfer_dir,sample,run])
 src_path = f"{data_dir}/{project}/{transfer_dir}_{sample}_{run}"
 
