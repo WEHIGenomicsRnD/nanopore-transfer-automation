@@ -9,7 +9,7 @@ from glob import iglob
 DATA_FILES = ["reports", "fastq", "fast5", "pod5", "bam"]
 POSSIBLE_FILE_TYPES = DATA_FILES + ["checksums"]
 STATES = ["pass"]
-#STATES = ["pass", "fail", "skip"]
+# STATES = ["pass", "fail", "skip"]
 
 # --------------------------------------------------------------------------- #
 # Config variables
@@ -103,7 +103,6 @@ def is_run_processing_complete(run_dir, project_dir_full):
     cfile_name = ".".join([run_uid, "processing.success"])
     trans_dir = "_".join([transfer_dir, sample, run])
     transfer_dir_full = os.path.join(project_dir_full, trans_dir)
-#    processing_complete_file = os.path.join(project_dir_full, sample, cfile_name)
     processing_complete_file = os.path.join(project_dir_full, sample, run, cfile_name)
     print(f"Process file: {processing_complete_file}")
 
@@ -316,7 +315,6 @@ for project in project_dirs:
                     f"Skipping {run_sample} in project {project} (run incomplete).",
                     file=sys.stdout,
                 )
-
 #        print(f"rin sample - {runs_uid}")
 #        print(f" sample - {samples}")
 #        print(f" project - {projects}")
