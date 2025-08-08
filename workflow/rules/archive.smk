@@ -23,7 +23,7 @@ rule calculate_checksums:
     shell:
         """
         cd {params.data_dir}/{wildcards.project} &&
-            find {wildcards.sample}/{wildcards.run}/* -type f | xargs shasum -a 1 > {output}
+            find {wildcards.sample}/{wildcards.run}/* ! -name '*skip*' ! -name '*fail*' -type f | xargs shasum -a 1 > {output}
         """
 
 

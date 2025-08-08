@@ -8,7 +8,8 @@ from glob import iglob
 # --------------------------------------------------------------------------- #
 DATA_FILES = ["reports", "fastq", "fast5", "pod5", "bam"]
 POSSIBLE_FILE_TYPES = DATA_FILES + ["checksums"]
-STATES = ["pass", "fail", "skip"]
+STATES = ["pass"]
+#STATES = ["pass", "fail", "skip"]
 
 # --------------------------------------------------------------------------- #
 # Config variables
