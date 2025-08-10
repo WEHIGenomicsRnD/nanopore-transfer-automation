@@ -127,9 +127,7 @@ rule tar_reports:
     input:
         [
             f"{data_dir}/{project}/{sample}/{run}"
-            for project, sample, run, run_uid in zip(
-                projects, samples, runs, runs_uid
-            )
+            for project, sample, run, run_uid in zip(projects, samples, runs, runs_uid)
         ],
     output:
         tar=expand(
