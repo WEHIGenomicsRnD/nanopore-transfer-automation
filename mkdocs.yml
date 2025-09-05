@@ -1,0 +1,5 @@
+site_name: Nanopore Transfer Automation
+nav:
+  - Setup: setup.md
+  - Deployment: deployment.md
+  - Troubleshooting: troubleshooting.md
