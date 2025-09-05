@@ -3,3 +3,4 @@ nav:
   - Setup: setup.md
   - Deployment: deployment.md
   - Troubleshooting: troubleshooting.md
+  - GitHub: https://github.com/WEHIGenomicsRnD/nanopore-transfer-automation
