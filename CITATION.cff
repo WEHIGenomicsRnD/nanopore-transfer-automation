@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: If you use this software, please cite it using these metadata.
+title: Nanopore Transfer Automation
+abstract: A snakemake pipeline that performs archiving and transfer of Nanopore sequencing data.
+authors:
+  - family-names: Cmero
+    given-names: Marek
+    orcid: "https://orcid.org/0000-0001-7783-5530"
+  - family-names: Gupta
+    given-names: Inna
+version: 0.5.0
+date-released: "2025-09-05"
+identifiers:
+  - description: Archived snapshots of Nanopore Transfer Automation
+    type: doi
+    value: "10.5281/zenodo.17059230"
+  - description: Snapshot of v0.5.0
+    type: doi
+    value: "10.5281/zenodo.17059231"
+license: MIT
+repository-code: "https://github.com/WEHIGenomicsRnD/nanopore-transfer-automation"
