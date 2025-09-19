@@ -17,6 +17,13 @@ file_types:
     - 'bam'
     - 'checksums'
 
+# read states to process based on the onboard base calling QC, e.g,, fastq_pass
+# must include 'pass'; can optionally include 'fail' and 'skip'
+read_states:
+  - 'pass'
+  #  - 'fail'
+  #  - 'skip'
+
 # project directory regex (set this based on
 # your lab's naming convention)
 proj_dir_regex: '^(\d{6,8})_([a-zA-Z0-9\-]+)_([a-zA-Z0-9\-]+)_([a-zA-Z0-9\-_]+)$'
