@@ -8,13 +8,13 @@ from glob import iglob
 # --------------------------------------------------------------------------- #
 DATA_FILES = ["reports", "fastq", "fast5", "pod5", "bam"]
 POSSIBLE_FILE_TYPES = DATA_FILES + ["checksums"]
-STATES = ["pass"]
-# STATES = ["pass", "fail", "skip"]
+#STATES = ["pass"]
 
 # --------------------------------------------------------------------------- #
 # Config variables
 # --------------------------------------------------------------------------- #
 data_dir = config["data_dir"]
+states = config["states"]
 transfer_dir = config["transfer_dir"]
 extra_dirs = config["extra_dirs"]
 ignore_dirs = config["ignore_dirs"]
@@ -186,7 +186,7 @@ def get_output_by_type(filetype):
             if f"{filetype}" in files_under_sample:
                 outputs.append(f"{out_prefix}.{file_extension}")
                 outputs.append(f"{out_prefix}_list.txt")
-        for state in STATES:
+        for state in states:
             if f"{filetype}_{state}" in files_under_sample:
                 outputs.append(f"{out_prefix}_{state}.{file_extension}")
                 outputs.append(f"{out_prefix}_{state}_list.txt")

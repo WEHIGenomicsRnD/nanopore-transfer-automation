@@ -82,7 +82,7 @@ if "pod5" in file_types:
 
 for project, sample, run, run_uid in zip(projects, samples, runs, runs_uid):
     for file_type in file_types:
-        for state in STATES:
+        for state in states:
             ext = "tar" if file_type in ["fastq", "bam"] else "tar.gz"
             threads = 1 if file_type in ["fastq", "bam"] else config["threads"]
 

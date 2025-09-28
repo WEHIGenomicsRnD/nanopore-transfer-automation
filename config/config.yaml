@@ -29,6 +29,10 @@ end_of_run_file_regex: '^sequencing_summary\w*\.txt'
 # check if run is complete before processing
 check_if_complete: True
 
+# state of file to copy to destination (pass, fail, skip)
+states: 
+  - 'pass'
+
 # minimum number of seconds a run needs
 # to be finished before archiving
 time_delay: 0
