@@ -1,0 +1,9 @@
+# Snakemake temp files
+.snakemake
+logs/
+
+# Mac OS files
+.DS_Store
+
+# Test files
+.test/test_data

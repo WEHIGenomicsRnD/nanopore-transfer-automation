@@ -8,8 +8,7 @@ from glob import iglob
 # --------------------------------------------------------------------------- #
 DATA_FILES = ["reports", "fastq", "fast5", "pod5", "bam"]
 POSSIBLE_FILE_TYPES = DATA_FILES + ["checksums"]
-STATES = ["pass"]
-# STATES = ["pass", "fail", "skip"]
+POSSIBLE_READ_STATES = ["pass", "fail", "skip"]
 
 # --------------------------------------------------------------------------- #
 # Config variables
@@ -19,6 +18,7 @@ transfer_dir = config["transfer_dir"]
 extra_dirs = config["extra_dirs"]
 ignore_dirs = config["ignore_dirs"]
 file_types = config["file_types"]
+read_states = config["read_states"]
 proj_dir_regex = re.compile(r"%s" % config["proj_dir_regex"])
 end_of_run_file_regex = re.compile(r"%s" % config["end_of_run_file_regex"])
 ignore_proj_regex = str(config["ignore_proj_regex"]).lower() == "true"
@@ -52,6 +52,14 @@ if not isinstance(file_types, list) and file_types:
 for file_type in file_types:
     if file_type not in POSSIBLE_FILE_TYPES:
         print(f"Invalid file type {file_type} specified.", file=sys.stderr)
+        sys.exit()
+
+if "pass" not in read_states:
+    read_states.append("pass")
+
+for read_state in read_states:
+    if read_state not in POSSIBLE_READ_STATES:
+        print(f"Invalid read state {read_state} specified.", file=sys.stderr)
         sys.exit()
 
 if ignore_proj_regex and not extra_dirs:
@@ -186,7 +194,7 @@ def get_output_by_type(filetype):
             if f"{filetype}" in files_under_sample:
                 outputs.append(f"{out_prefix}.{file_extension}")
                 outputs.append(f"{out_prefix}_list.txt")
-        for state in STATES:
+        for state in read_states:
             if f"{filetype}_{state}" in files_under_sample:
                 outputs.append(f"{out_prefix}_{state}.{file_extension}")
                 outputs.append(f"{out_prefix}_{state}_list.txt")

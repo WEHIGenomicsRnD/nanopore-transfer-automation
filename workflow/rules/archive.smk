@@ -20,10 +20,17 @@ rule calculate_checksums:
         run=run,
         project=project,
         sample=sample,
+        exclude_patterns=lambda wildcards: " ".join(
+            [
+                f"! -name '*_{state}*'"
+                for state in ["skip", "fail"]
+                if state not in read_states
+            ]
+        ),
     shell:
         """
         cd {params.data_dir}/{wildcards.project} &&
-            find {wildcards.sample}/{wildcards.run}/* ! -name '*_skip*' ! -name '*_fail*' -type f | xargs shasum -a 1 > {output}
+            find {wildcards.sample}/{wildcards.run}/* {params.exclude_patterns} -type f | xargs shasum -a 1 > {output}
         """
 
 
@@ -82,7 +89,7 @@ if "pod5" in file_types:
 
 for project, sample, run, run_uid in zip(projects, samples, runs, runs_uid):
     for file_type in file_types:
-        for state in STATES:
+        for state in read_states:
             ext = "tar" if file_type in ["fastq", "bam"] else "tar.gz"
             threads = 1 if file_type in ["fastq", "bam"] else config["threads"]
 
