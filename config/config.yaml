@@ -53,6 +53,10 @@ ignore_dirs:
 # script on *only* the extra_dirs set above
 ignore_proj_regex: False
 
+#whether to transfer data via globus cli
+transfer_cli: False
+
+
 # number of threads to use
 threads: 12
 
