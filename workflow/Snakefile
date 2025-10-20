@@ -7,6 +7,7 @@ min_version("6.7.0")
 # ------------- setup ------------
 configfile: "config/config.yaml"
 
+transfer_cli = str(config.get("transfer_cli", "false")).lower() == "true"
 
 report: "report/workflow.rst"
 
@@ -16,7 +17,10 @@ report: "report/workflow.rst"
 
 include: "rules/common.smk"
 include: "rules/archive.smk"
-include: "rules/transfer.smk"
+if transfer_cli:
+   include: "rules/transfer_cli.smk"
+else:
+   include: "rules/transfer_flow.smk"
 
 
 # ------------- workflow ------------
