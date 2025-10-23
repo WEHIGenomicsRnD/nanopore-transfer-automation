@@ -44,6 +44,9 @@ time_delay: 0
 extra_dirs:
     - 'TEST_b'
 
+#whether to transfer data via globus cli
+transfer_cli: False
+
 # do not process these directories
 ignore_dirs:
     - '20221208_wehi_bowden_runb'
