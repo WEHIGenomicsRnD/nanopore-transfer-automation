@@ -16,7 +16,7 @@ rule transfer:
          src_endpoint = config["src_endpoint"],
          dest_endpoint = config["dest_endpoint"],
          dest_path = config["dest_path"],
-         delete_on_transfer = str(config["delete_on_transfer"]).lower()
+         delete_on_transfer = str(config["delete_on_transfer"]).lower(),
     shell:
          """
          transfer_task_id=$(globus transfer \
@@ -28,7 +28,7 @@ rule transfer:
          globus task wait "$transfer_task_id" --heartbeat
 
             
-         if [ {params.delete_on_transfer} = "true"]; then
+         if [[ "{params.delete_on_transfer}" = "true" ]]; then
 
              delete_task_id=$(globus delete \
                   {params.src_endpoint}:{params.data_dir}/{wildcards.project}/{params.transfer_dir}_{wildcards.sample}_{wildcards.run} \
