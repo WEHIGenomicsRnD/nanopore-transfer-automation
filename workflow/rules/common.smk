@@ -247,7 +247,6 @@ def get_archive_complete_outputs():
 def get_transfer_outputs():
     if transfer:
         transfer_outputs = [
-#            f"{data_dir}/{project}/{transfer_dir}_{sample}_{run}/logs/{project}_{sample}_{run_uid}_transfer.txt"
             f"{data_dir}/{project}/{sample}/{run}/{run_uid}.processing.success"
             for project, sample, run, run_uid in zip(projects, samples, runs, runs_uid)
         ]
