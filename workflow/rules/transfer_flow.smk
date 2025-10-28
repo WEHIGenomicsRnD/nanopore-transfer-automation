@@ -35,5 +35,4 @@ if delete_on_transfer:
                 {params.globus_flow_id} \
                 --flow-input {input} \
                 --label "Transfer {wildcards.project}" > {output}
-
             """
