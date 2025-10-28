@@ -53,10 +53,6 @@ ignore_dirs:
 # script on *only* the extra_dirs set above
 ignore_proj_regex: False
 
-#whether to transfer data via globus cli
-transfer_cli: False
-
-
 # number of threads to use
 threads: 12
 
@@ -65,6 +61,9 @@ transfer: False
 
 # whether to delete data from source endpoint after transfer
 delete_on_transfer: False
+
+#whether to transfer data via globus cli
+transfer_cli: False
 
 # Globus Flow ID to use for transfer (Move (copy and delete) files using Globus)
 # only used if delete_on_transfer flag is true

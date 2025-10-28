@@ -44,8 +44,6 @@ time_delay: 0
 extra_dirs:
     - 'TEST_b'
 
-#whether to transfer data via globus cli
-transfer_cli: False
 
 # do not process these directories
 ignore_dirs:
@@ -63,6 +61,9 @@ transfer: False
 
 # whether to delete data from source endpoint after transfer
 delete_on_transfer: False
+
+#whether to transfer data via globus cli
+transfer_cli: False
 
 # Globus Flow ID to use for transfer
 # only used if delete_on_transfer flag is true
