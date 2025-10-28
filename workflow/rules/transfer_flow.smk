@@ -14,7 +14,7 @@ if delete_on_transfer:
         threads: 1
         script:
             "../scripts/create_globus_json_input.py"
-    
+
     # NOTE: this step will only invoke the transfer but there is no guarantee that it
     # will be successful. Check the Globus dashboard for the status of the transfer.
     rule transfer:
