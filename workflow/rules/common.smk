@@ -25,6 +25,7 @@ ignore_proj_regex = str(config["ignore_proj_regex"]).lower() == "true"
 check_if_complete = str(config["check_if_complete"]).lower() == "true"
 transfer = str(config["transfer"]).lower() == "true"
 delete_on_transfer = str(config["delete_on_transfer"]).lower() == "true"
+transfer_cli = str(config["transfer_cli"]).lower() == "true"
 
 # --------------------------------------------------------------------------- #
 # Input validation
@@ -116,16 +117,16 @@ def is_run_processing_complete(run_dir, project_dir_full):
 
     if os.path.exists(transfer_dir_full):
         files_in_transfer_dir = next(os.walk(transfer_dir_full))[1]
-        final_file = "transfer.txt" if transfer else "tar_file_counts.txt"
+        final_file = "processing.success" if transfer else "tar_file_counts.txt"
 
         project_name = os.path.basename(project_dir_full)
         final_file_with_projname = (
-            f"{project_name}_transfer.txt"
+            f"{run_uid}.processing.success"
             if transfer
             else f"{project_name}_file_counts.txt"
         )
         final_file_legacy = (
-            f"{project_name}_transfer.txt"
+            f"{run_uid}.processing.success"
             if transfer
             else f"{project_name}_tar_file_counts.txt"
         )
@@ -246,7 +247,7 @@ def get_archive_complete_outputs():
 def get_transfer_outputs():
     if transfer:
         transfer_outputs = [
-            f"{data_dir}/{project}/{transfer_dir}_{sample}_{run}/logs/{project}_{sample}_{run_uid}_transfer.txt"
+            f"{data_dir}/{project}/{sample}/{run}/{run_uid}.processing.success"
             for project, sample, run, run_uid in zip(projects, samples, runs, runs_uid)
         ]
         return transfer_outputs

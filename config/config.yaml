@@ -62,6 +62,9 @@ transfer: False
 # whether to delete data from source endpoint after transfer
 delete_on_transfer: False
 
+#whether to transfer data via globus cli
+transfer_cli: False
+
 # Globus Flow ID to use for transfer (Move (copy and delete) files using Globus)
 # only used if delete_on_transfer flag is true
 globus_flow_id: 'f37e5766-7b3c-4c02-92ee-e6aacd8f4cb8'
