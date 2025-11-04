@@ -8,8 +8,7 @@ from glob import iglob
 # --------------------------------------------------------------------------- #
 DATA_FILES = ["reports", "fastq", "fast5", "pod5", "bam"]
 POSSIBLE_FILE_TYPES = DATA_FILES + ["checksums"]
-STATES = ["pass"]
-# STATES = ["pass", "fail", "skip"]
+POSSIBLE_READ_STATES = ["pass", "fail", "skip"]
 
 # --------------------------------------------------------------------------- #
 # Config variables
@@ -19,12 +18,14 @@ transfer_dir = config["transfer_dir"]
 extra_dirs = config["extra_dirs"]
 ignore_dirs = config["ignore_dirs"]
 file_types = config["file_types"]
+read_states = config["read_states"]
 proj_dir_regex = re.compile(r"%s" % config["proj_dir_regex"])
 end_of_run_file_regex = re.compile(r"%s" % config["end_of_run_file_regex"])
 ignore_proj_regex = str(config["ignore_proj_regex"]).lower() == "true"
 check_if_complete = str(config["check_if_complete"]).lower() == "true"
 transfer = str(config["transfer"]).lower() == "true"
 delete_on_transfer = str(config["delete_on_transfer"]).lower() == "true"
+transfer_cli = str(config["transfer_cli"]).lower() == "true"
 
 # --------------------------------------------------------------------------- #
 # Input validation
@@ -52,6 +53,14 @@ if not isinstance(file_types, list) and file_types:
 for file_type in file_types:
     if file_type not in POSSIBLE_FILE_TYPES:
         print(f"Invalid file type {file_type} specified.", file=sys.stderr)
+        sys.exit()
+
+if "pass" not in read_states:
+    read_states.append("pass")
+
+for read_state in read_states:
+    if read_state not in POSSIBLE_READ_STATES:
+        print(f"Invalid read state {read_state} specified.", file=sys.stderr)
         sys.exit()
 
 if ignore_proj_regex and not extra_dirs:
@@ -108,16 +117,16 @@ def is_run_processing_complete(run_dir, project_dir_full):
 
     if os.path.exists(transfer_dir_full):
         files_in_transfer_dir = next(os.walk(transfer_dir_full))[1]
-        final_file = "transfer.txt" if transfer else "tar_file_counts.txt"
+        final_file = "processing.success" if transfer else "tar_file_counts.txt"
 
         project_name = os.path.basename(project_dir_full)
         final_file_with_projname = (
-            f"{project_name}_transfer.txt"
+            f"{run_uid}.processing.success"
             if transfer
             else f"{project_name}_file_counts.txt"
         )
         final_file_legacy = (
-            f"{project_name}_transfer.txt"
+            f"{run_uid}.processing.success"
             if transfer
             else f"{project_name}_tar_file_counts.txt"
         )
@@ -186,7 +195,7 @@ def get_output_by_type(filetype):
             if f"{filetype}" in files_under_sample:
                 outputs.append(f"{out_prefix}.{file_extension}")
                 outputs.append(f"{out_prefix}_list.txt")
-        for state in STATES:
+        for state in read_states:
             if f"{filetype}_{state}" in files_under_sample:
                 outputs.append(f"{out_prefix}_{state}.{file_extension}")
                 outputs.append(f"{out_prefix}_{state}_list.txt")
@@ -238,7 +247,7 @@ def get_archive_complete_outputs():
 def get_transfer_outputs():
     if transfer:
         transfer_outputs = [
-            f"{data_dir}/{project}/{transfer_dir}_{sample}_{run}/logs/{project}_{sample}_{run_uid}_transfer.txt"
+            f"{data_dir}/{project}/{sample}/{run}/{run_uid}.processing.success"
             for project, sample, run, run_uid in zip(projects, samples, runs, runs_uid)
         ]
         return transfer_outputs
