@@ -25,7 +25,7 @@ If you have installed conda on your instrument machine (e.g., PromethION), you m
 eval "$(/home/prom/miniforge3/bin/conda shell.bash hook)"
 ```
 
-You may also want to use `--rerun-incomplete` in your snakemake comman for rerunning incomplete runs were there has been some issue, and setting `--keep-going` to allow all other processing to continue if there is some premature error. 
+You may also want to use `--rerun-incomplete` in your snakemake command for rerunning incomplete runs where there has been some issue, and setting `--keep-going` to allow all other processing to continue if there is some premature error.
 
 ## Run automation
 

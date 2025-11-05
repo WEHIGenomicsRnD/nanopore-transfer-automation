@@ -13,7 +13,6 @@ A [snakemake](https://snakemake.readthedocs.io) pipeline that performs archiving
 <details>
 <summary>Click to view Mermaid diagram</summary>
 ```mermaid
-Mermaid diagram
 flowchart TD
     A("Get complete runs")
         B["Calculate file
