@@ -1,10 +1,42 @@
+[![Snakemake](https://img.shields.io/badge/snakemake-≥8.2.3-brightgreen.svg)](https://snakemake.bitbucket.io)
+[![Tests](https://github.com/WEHIGenomicsRnD/nanopore-transfer-automation/actions/workflows/main.yaml/badge.svg)](https://github.com/WEHIGenomicsRnD/nanopore-transfer-automation/actions/workflows/main.yaml)
+[![DOI](https://zenodo.org/badge/576124958.svg)](https://doi.org/10.5281/zenodo.17059230)
+
 # Sequencing automations
 
 A [snakemake](https://snakemake.readthedocs.io) pipeline that performs archiving and transfer of Nanopore sequencing data.
 
 ## What it does
 
-![workflow](dag.png)
+![workflow](workflow.png)
+
+<details>
+<summary>Click to view Mermaid diagram</summary>
+```mermaid
+flowchart TD
+    A("Get complete runs")
+        B["Calculate file
+           checksums"]
+    A --> C["Tar FastQ files"]
+    A --> D["Tar raw files"]
+    A --> 
+        E["Tar reports
+           & metadata"]
+    C --> 
+        F["Validate tar
+           file counts"]
+    D --> F
+    E --> F
+    C --> 
+        G["Calculate tar
+           checksums"]
+    D --> G
+    E --> G
+    G --> H["Globus transfer
+             & delete"]
+    F --> H
+```
+</details>
 
 The pipeline identifies project directories, determines whether each sample under the directory has finished its run, then performs archiving, checksum calculation, validation and ultimately transfers the archives to a specified [Globus](https://www.globus.org/) endpoint. The pipeline is intended to be run on the Nanopore sequencing machine's PC, and can be set up to periodically run as a cron job.
 
@@ -16,15 +48,15 @@ The pipeline checks for finished Nanopore sequencing runs by finding run directo
 
 `YYYYMMDD_affiliation_lab_project`
 
-Optionally, you may wish to specify directly the directories to archive, which can be done by setting `ignore_project_regex: True` and adding your project directories in a YAML list to `extra_dirs:`. You can also ignore project directories by adding them to `ignore_dirs`. 
+This can be changed via the regex mask (`proj_dir_regex`) found in the `config.yaml` file. Optionally, you may wish to specify directly the directories to archive, which can be done by setting `ignore_project_regex: True` and adding your project directories in a YAML list to `extra_dirs:`. You can also ignore project directories by adding them to `ignore_dirs`. 
 
-The pipeline will check for the presence of the sequencing summary file, which indicates that the run has finished (the regex of the file the pipeline looks for can be changed in the config) with an optional time delay (i.e., the pipeline will only process the run if N seconds have passed since the file was modified).
+The pipeline will check for the presence of the sequencing summary file, which indicates that the run has finished (specified in the `config.yaml` under `end_of_run_file_regex`). There is an optional time delay; when this is set, the run will only be processed if N seconds have passed since the file was modified.
 
-The file types handled can also be specified in the config, and includes reports/metadata, fastq, pod5, fast5 and checksums. Bam files are currently not handled, so you will have to deal with these manually.
+The file types handled can also be specified in the config, and includes reports/metadata, fastq, pod5, fast5 and checksums.
 
-The pipeline checks each tar file and outputs the files present to a text file. This is useful for validation. The `tar_file_counts.txt` and `system_file_counts.txt` files are created once archiving is complete, and lets you check that the counts on the file system and within your tar files matches. 
+The pipeline checks each tar file and outputs the files present to a text file. This is useful for validation. The `*_file_counts.txt` files are created once archiving is complete, and lets you check that the counts on the file system and within your tar files matches. 
 
-Using the transfer automation requires setting up [Globus](https://www.globus.org/) endpoints. Refer to the [Globus documentation](https://docs.globus.org/) on how to do this. You will also have to manually authenticate on your first run of the pipeline. Make sure to set `transfer: True` if you want to use this, as well as your `src_endpoint`, `dest_endpoint` and `dest_path`. You can also set `delete_on_transfer: False` to delete the `_transfer` directory after a successful transfer. **NOTE: this will not delete anything outside of the `_transfer` directory.** We recommend setting up a robust run deletion workflow to ensure data is not accidently deleted.
+Using the transfer automation requires setting up [Globus](https://www.globus.org/) endpoints. Refer to the [Globus documentation](https://docs.globus.org/) on how to do this. You will also have to manually authenticate on your first run of the pipeline. Make sure to set `transfer: True` if you want to use this, as well as your `src_endpoint`, `dest_endpoint` and `dest_path`. You can also set `delete_on_transfer: False` to delete the `_transfer_sample_run` directory after a successful transfer. **NOTE: this will not delete anything outside of the `_transfer_sample_run` directory.** Due to the potentially destructive nature of this operation, we recommend that you thoroughly test the software on your particular environment configuration.
 
 ## Installation
 
@@ -72,6 +104,6 @@ snakemake --cores 1 --dry-run
 
 ## Output
 
-The pipeline will produce a `_transfer` directory under each project for transfer. This can then be transferred via `rsync` manually, or in an automated fashion using the Globus transfer built into the pipeline.
+The pipeline will produce a `_transfer` directory under each project for transfer. This can then be transferred manually, or in an automated fashion using the Globus transfer built into the pipeline.
 
-**NOTE: make sure your sequencer has enough disk space to accommodate the archive files, this means each 1TB run will need 1TB free space to perform the archiving.**
+**NOTE: make sure the machine you are running this workflow on has enough disk space to accommodate the archive files, this means each 1TB run will need 1TB free space to perform the archiving.**
