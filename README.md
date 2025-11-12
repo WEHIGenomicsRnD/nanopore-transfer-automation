@@ -2,7 +2,7 @@
 [![Tests](https://github.com/WEHIGenomicsRnD/nanopore-transfer-automation/actions/workflows/main.yaml/badge.svg)](https://github.com/WEHIGenomicsRnD/nanopore-transfer-automation/actions/workflows/main.yaml)
 [![DOI](https://zenodo.org/badge/576124958.svg)](https://doi.org/10.5281/zenodo.17059230)
 
-# Sequencing automations
+# Nanopore Transfer Automation
 
 A [snakemake](https://snakemake.readthedocs.io) pipeline that performs archiving and transfer of Nanopore sequencing data.
 
