@@ -53,7 +53,7 @@ The configuration file is found under `config/config.yaml`. Make sure to revise 
 | ignore_proj_regex     | Set true if you only want to run the script on only the extra_dirs set above                                                    |
 | threads               | Number of threads to use                                                                                                        |
 | transfer              | Whether to transfer data upon archiving completion using Globus                                                                 |
-| delete_on_transfer    | Whether to delete data from source endpoint after transfer                                                                      |
+| delete_on_transfer    | Whether to delete the run's `_transfer_sample_run` directory after completing transfer (NOTE: the original run is never deleted)|
 | globus_flow_id        | Globus Flow ID to use for transfer (Move (copy and delete) files using Globus) - only used if delete_on_transfer flag is true   |
 | src_endpoint          | This machine's Globus endpoint ID                                                                                               |
 | dest_endpoint         | Globus destination endpoint ID                                                                                                  |
