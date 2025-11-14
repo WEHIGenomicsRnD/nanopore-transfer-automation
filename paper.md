@@ -1,5 +1,5 @@
 ---
-title: 'An automated run transfer tool for Nanopore sequencing data'
+title: 'An automated transfer tool for nanopore sequencing data'
 tags:
   - Nanopore
   - snakemake
@@ -35,13 +35,12 @@ For the above reasons, data transfer of ONT data is a non-trivial problem and is
 
 Nanopore sequencers generate large amounts of data. Due to security requirements and isolated instrument networks, it can be non-trivial to move data from sequencing machines to destination areas in the local network in a timely, automated and error-tolerant way. NFS (Network File System) is a potential solution for streaming data from an instrument such as the PromethION to a designated network location, however, may not be possible in some cases due to security restrictions. To facilitate streaming of raw and processed data on to local storage, ONT sequencers typically create numbers of small files under run directories, resulting in many fast5/pod5 and fastq files that correspond to a single run. Destination file systems, particularly those that are backed up to tape, perform sub-optimally with large numbers of small files.
 
-To address these problems, we have developed an automatable snakemake pipeline that handles tarring of these files into a small number of archives per run, performing checksum calculation and integrity checking, and then transfering the data between the source (the sequencing machine) and the destination network location (\autoref{fig:workflow}). The tool is able to run periodically, scanning for new runs, checking that they are complete, and performing any archiving operations for finished runs. The workflow need not be run on the source machine. For example, it could be used solely as a packaging tool on the destination-side of the network, which is particularly useful for long-term storage, and for sending sequencing data to external parties. We provide a configuration that can be customised by the end-user to fit within their data naming practices and processing requirements.
+To address these problems, we have developed an automatable snakemake pipeline that handles tarring of these files into a small number of archives per run, performing checksum calculation and integrity checking, and then transfering the data between the source (the sequencing machine) and the destination network location (Figure 1). The tool is able to run periodically, scanning for new runs, checking that they are complete, and performing any archiving operations for finished runs. The workflow need not be run on the source machine. For example, it could be used solely as a packaging tool on the destination-side of the network, which is particularly useful for long-term storage, and for sending sequencing data to external parties. We provide a configuration that can be customised by the end-user to fit within their data naming practices and processing requirements.
 
 The Nanopore Transfer Automation tool is designed to be used in a sequencing facility environment, and has been used to successfully process over 400 PromethION runs to date in the WEHI Genomics Advanced Genomics Facility. The tool has enabled a streamlined processing workflow that is able to save significant amount of processing time per run, while avoiding error-prone manual archiving and copying that can potentially lead to data loss. The automated system presented allows runs to be processed in a timely fashion with minimal intervention, allowing researchers to begin analysing their data sooner.
 
 # Figures
 
-- **Figure 1**: Workflow diagram showing processing steps in the Nanopore Transfer Automation tool.
 ![Workflow diagram.\label{fig:workflow}](workflow.png){ width=80% }
 
 # Acknowledgements
